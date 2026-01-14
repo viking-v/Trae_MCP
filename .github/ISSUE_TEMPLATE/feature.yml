@@ -1,0 +1,49 @@
+name: Feature
+description: 需求/功能任务（MCP）
+title: "[Feature] "
+labels:
+  - feature
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: 需求概述
+      description: 一句话说清做什么与为什么
+    validations:
+      required: true
+  - type: textarea
+    id: deliverable
+    attributes:
+      label: 输出物与验收标准
+      description: 写清输出物与验收方式（截图/接口/用例）
+      placeholder: |
+        输出物：
+        验收：
+    validations:
+      required: true
+  - type: input
+    id: owner
+    attributes:
+      label: Owner
+      description: 负责人（GitHub用户名）
+      placeholder: "@username"
+    validations:
+      required: true
+  - type: input
+    id: due
+    attributes:
+      label: 截止时间
+      description: 例如 2026-02-01
+    validations:
+      required: false
+  - type: dropdown
+    id: priority
+    attributes:
+      label: 优先级
+      options:
+        - P1
+        - P2
+        - P3
+    validations:
+      required: true
+

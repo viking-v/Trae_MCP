@@ -1,0 +1,1165 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户中心 - 梦之缘创业投资平台</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- DaisyUI -->
+    <link href="https://cdn.bootcdn.net/ajax/libs/daisyui/4.12.10/full.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+        
+        :root {
+            --primary: 45 100% 50%;
+            --primary-dark: 45 100% 40%;
+            --secondary: 210 40% 98%;
+            --accent: 0 0% 100%;
+            --background: 0 0% 99%;
+            --foreground: 222.2 84% 4.9%;
+            --muted: 210 40% 96%;
+            --border: 214.3 31.8% 91.4%;
+            
+            --gradient-gold: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-dark)));
+            --gradient-subtle: linear-gradient(180deg, hsl(var(--background)), hsl(var(--muted)));
+            
+            --shadow-elegant: 0 10px 30px -10px hsl(var(--primary) / 0.2);
+            --shadow-card: 0 4px 20px hsl(var(--foreground) / 0.08);
+        }
+        
+        body {
+            font-family: 'Noto Sans SC', 'Inter', sans-serif;
+            background: hsl(var(--background));
+            color: hsl(var(--foreground));
+        }
+        
+        .gradient-gold {
+            background: var(--gradient-gold);
+        }
+        
+        .text-gold {
+            color: hsl(var(--primary));
+        }
+        
+        .bg-gold {
+            background-color: hsl(var(--primary));
+        }
+        
+        .hover-gold:hover {
+            background-color: hsl(var(--primary-dark));
+        }
+        
+        .shadow-card {
+            box-shadow: var(--shadow-card);
+        }
+        
+        .card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-elegant);
+        }
+        
+        /* 自定义滚动条 */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: hsl(var(--muted));
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: hsl(var(--primary));
+            border-radius: 3px;
+        }
+        
+        /* 状态标签 */
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .status-pending {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+        
+        .status-active {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status-inactive {
+            background-color: #e5e7eb;
+            color: #374151;
+        }
+        
+        /* 团队树形结构 */
+        .team-tree {
+            position: relative;
+        }
+        
+        .team-node {
+            position: relative;
+            padding: 1rem;
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: var(--shadow-card);
+            margin-bottom: 1rem;
+        }
+        
+        .team-node::before {
+            content: '';
+            position: absolute;
+            left: -1rem;
+            top: 50%;
+            width: 1rem;
+            height: 2px;
+            background: hsl(var(--primary));
+        }
+        
+        /* 邀请码样式 */
+        .invite-code {
+            background: hsl(var(--muted));
+            border: 1px solid hsl(var(--border));
+            border-radius: 0.375rem;
+            padding: 0.5rem 0.75rem;
+            font-family: monospace;
+            font-size: 0.875rem;
+            word-break: break-all;
+        }
+        
+        /* 进度条 */
+        .progress-bar {
+            width: 100%;
+            height: 0.5rem;
+            background-color: hsl(var(--muted));
+            border-radius: 9999px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: var(--gradient-gold);
+            transition: width 0.3s ease;
+        }
+    </style>
+  </head>
+
+  <body>
+    <!-- 顶部导航 -->
+    <nav class="bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50">
+      <div class="container mx-auto px-4">
+        <div class="flex items-center justify-between h-16">
+          <div class="flex items-center space-x-2">
+            <div class="w-8 h-8 gradient-gold rounded-lg flex items-center justify-center">
+              <i class="fas fa-coins text-white text-sm"></i>
+            </div>
+            <h1 class="text-xl font-bold text-gray-900">梦之缘投资 - 用户中心</h1>
+          </div>
+
+          <div class="flex items-center space-x-4">
+            <div class="text-sm text-gray-600">
+              欢迎，<span id="currentUsername" class="font-medium"></span>
+            </div>
+            <button onclick="logout()" class="px-4 py-2 text-gray-600 hover:text-red-600 transition-colors">
+              <i class="fas fa-sign-out-alt mr-2"></i>退出
+            </button>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <div class="flex">
+      <!-- 侧边栏 -->
+      <aside class="w-64 bg-white border-r border-gray-200 min-h-screen">
+        <div class="p-4">
+          <nav class="space-y-2">
+            <button onclick="showSection('overview')" class="nav-item w-full text-left px-4 py-3 rounded-lg bg-gold text-white">
+              <i class="fas fa-tachometer-alt mr-3"></i>总览
+            </button>
+            <button onclick="showSection('activation')" class="nav-item w-full text-left px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700">
+              <i class="fas fa-credit-card mr-3"></i>账户激活
+            </button>
+            <button onclick="showSection('team')" class="nav-item w-full text-left px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700">
+              <i class="fas fa-sitemap mr-3"></i>我的团队
+            </button>
+            <button onclick="showSection('commissions')" class="nav-item w-full text-left px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700">
+              <i class="fas fa-chart-line mr-3"></i>分润收益
+            </button>
+            <button onclick="showSection('invite')" class="nav-item w-full text-left px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700">
+              <i class="fas fa-user-plus mr-3"></i>邀请好友
+            </button>
+            <button onclick="showSection('profile')" class="nav-item w-full text-left px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700">
+              <i class="fas fa-user mr-3"></i>个人资料
+            </button>
+          </nav>
+        </div>
+      </aside>
+
+      <!-- 主内容区 -->
+      <main class="flex-1 p-6">
+        <!-- 总览 -->
+        <section id="overview" class="section-content">
+          <h2 class="text-2xl font-bold text-gray-900 mb-6">账户总览</h2>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="card-hover bg-white p-6 rounded-xl shadow-card">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-gray-600 text-sm">激活状态</p>
+                  <p class="text-lg font-bold" id="activationStatus">未激活</p>
+                </div>
+                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <i class="fas fa-user-check text-blue-600"></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="card-hover bg-white p-6 rounded-xl shadow-card">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-gray-600 text-sm">直推人数</p>
+                  <p class="text-2xl font-bold text-gray-900" id="directReferrals">0/5</p>
+                </div>
+                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                  <i class="fas fa-users text-green-600"></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="card-hover bg-white p-6 rounded-xl shadow-card">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-gray-600 text-sm">团队总人数</p>
+                  <p class="text-2xl font-bold text-purple-600" id="teamSize">0</p>
+                </div>
+                <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                  <i class="fas fa-network-wired text-purple-600"></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="card-hover bg-white p-6 rounded-xl shadow-card">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-gray-600 text-sm">累计收益</p>
+                  <p class="text-2xl font-bold text-gold" id="totalEarnings">$0.00</p>
+                </div>
+                <div class="w-12 h-12 gradient-gold rounded-lg flex items-center justify-center">
+                  <i class="fas fa-dollar-sign text-white"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 快速操作 -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="card-hover bg-gradient-to-br from-gray-50 to-white p-6 rounded-xl border border-gray-100 text-center">
+              <div class="w-16 h-16 gradient-gold rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-credit-card text-white text-xl"></i>
+              </div>
+              <h3 class="text-lg font-semibold text-gray-900 mb-2">账户激活</h3>
+              <p class="text-gray-600 mb-4">充值 $300 激活您的账户</p>
+              <button onclick="showSection('activation')" class="w-full px-4 py-2 gradient-gold text-white rounded-lg hover-gold transition-all">
+                立即激活
+              </button>
+            </div>
+
+            <div class="card-hover bg-gradient-to-br from-gray-50 to-white p-6 rounded-xl border border-gray-100 text-center">
+              <div class="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-user-plus text-white text-xl"></i>
+              </div>
+              <h3 class="text-lg font-semibold text-gray-900 mb-2">邀请好友</h3>
+              <p class="text-gray-600 mb-4">分享邀请码，获得分润</p>
+              <button onclick="showSection('invite')" class="w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all">
+                邀请好友
+              </button>
+            </div>
+
+            <div class="card-hover bg-gradient-to-br from-gray-50 to-white p-6 rounded-xl border border-gray-100 text-center">
+              <div class="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-chart-line text-white text-xl"></i>
+              </div>
+              <h3 class="text-lg font-semibold text-gray-900 mb-2">收益明细</h3>
+              <p class="text-gray-600 mb-4">查看您的分润收益</p>
+              <button onclick="showSection('commissions')" class="w-full px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all">
+                查看收益
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- 账户激活 -->
+        <section id="activation" class="section-content hidden">
+          <h2 class="text-2xl font-bold text-gray-900 mb-6">账户激活</h2>
+
+          <div class="bg-white rounded-xl shadow-card p-6 mb-6">
+            <div class="text-center mb-6">
+              <h3 class="text-xl font-semibold text-gray-900 mb-2">激活您的账户</h3>
+              <p class="text-gray-600">充值 $300 USD 即可激活账户，享受七级分润权益</p>
+            </div>
+
+            <div class="max-w-md mx-auto">
+              <div class="bg-gray-50 rounded-lg p-4 mb-6">
+                <h4 class="font-semibold text-gray-900 mb-3">激活信息</h4>
+                <div class="space-y-2 text-sm">
+                  <div class="flex justify-between">
+                    <span class="text-gray-600">激活金额：</span>
+                    <span class="font-semibold">$300 USD</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-gray-600">支持币种：</span>
+                    <span class="font-semibold">USDT (TRC-20)</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-gray-600">激活状态：</span>
+                    <span id="currentActivationStatus" class="font-semibold">未激活</span>
+                  </div>
+                </div>
+              </div>
+
+              <form onsubmit="handleActivation(event)">
+                <div class="space-y-4">
+                  <div class="form-control">
+                    <label class="label">
+                      <span class="label-text text-gray-700">充值金额</span>
+                    </label>
+                    <input type="number" value="300" class="input input-bordered w-full" readonly>
+                  </div>
+
+                  <div class="form-control">
+                    <label class="label">
+                      <span class="label-text text-gray-700">上传凭证</span>
+                    </label>
+                    <input type="file" id="voucherFile" class="file-input file-input-bordered w-full" accept="image/*" required>
+                    <label class="label">
+                      <span class="label-text-alt text-gray-500">请上传充值凭证截图</span>
+                    </label>
+                  </div>
+
+                  <div class="form-control">
+                    <label class="label">
+                      <span class="label-text text-gray-700">交易哈希（可选）</span>
+                    </label>
+                    <input type="text" id="txHash" class="input input-bordered w-full" placeholder="请输入交易哈希">
+                  </div>
+
+                  <div class="form-control mt-6">
+                    <button type="submit" class="btn gradient-gold text-white hover-gold border-none w-full">
+                      提交审核
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- 激活历史 -->
+          <div class="bg-white rounded-xl shadow-card p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">激活记录</h3>
+            <div id="activationHistory" class="space-y-3">
+              <div class="text-gray-500 text-center py-8">暂无激活记录</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 我的团队 -->
+        <section id="team" class="section-content hidden">
+          <h2 class="text-2xl font-bold text-gray-900 mb-6">我的团队</h2>
+
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+            <div class="card-hover bg-white p-6 rounded-xl shadow-card">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-gray-600 text-sm">直推人数</p>
+                  <p class="text-2xl font-bold text-gray-900" id="directCount">0/5</p>
+                </div>
+                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <i class="fas fa-user-friends text-blue-600"></i>
+                </div>
+              </div>
+              <div class="mt-4">
+                <div class="progress-bar">
+                  <div class="progress-fill" id="directProgress" style="width: 0%"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card-hover bg-white p-6 rounded-xl shadow-card">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-gray-600 text-sm">团队总人数</p>
+                  <p class="text-2xl font-bold text-purple-600" id="teamTotalCount">0</p>
+                </div>
+                <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                  <i class="fas fa-network-wired text-purple-600"></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="card-hover bg-white p-6 rounded-xl shadow-card">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-gray-600 text-sm">最大深度</p>
+                  <p class="text-2xl font-bold text-green-600" id="maxDepth">0</p>
+                </div>
+                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                  <i class="fas fa-layer-group text-green-600"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 团队结构 -->
+          <div class="bg-white rounded-xl shadow-card p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">团队结构</h3>
+            <div id="teamStructure" class="team-tree">
+              <div class="text-gray-500 text-center py-8">暂无团队成员</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 分润收益 -->
+        <section id="commissions" class="section-content hidden">
+          <h2 class="text-2xl font-bold text-gray-900 mb-6">分润收益</h2>
+
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+            <div class="card-hover bg-white p-6 rounded-xl shadow-card">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-gray-600 text-sm">今日收益</p>
+                  <p class="text-xl font-bold text-gold" id="todayEarnings">$0.00</p>
+                </div>
+                <div class="w-10 h-10 gradient-gold rounded-lg flex items-center justify-center">
+                  <i class="fas fa-calendar-day text-white"></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="card-hover bg-white p-6 rounded-xl shadow-card">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-gray-600 text-sm">本周收益</p>
+                  <p class="text-xl font-bold text-blue-600" id="weekEarnings">$0.00</p>
+                </div>
+                <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <i class="fas fa-calendar-week text-blue-600"></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="card-hover bg-white p-6 rounded-xl shadow-card">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-gray-600 text-sm">本月收益</p>
+                  <p class="text-xl font-bold text-purple-600" id="monthEarnings">$0.00</p>
+                </div>
+                <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                  <i class="fas fa-calendar-alt text-purple-600"></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="card-hover bg-white p-6 rounded-xl shadow-card">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-gray-600 text-sm">累计收益</p>
+                  <p class="text-xl font-bold text-green-600" id="totalCommissionEarnings">$0.00</p>
+                </div>
+                <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                  <i class="fas fa-coins text-green-600"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 分润明细 -->
+          <div class="bg-white rounded-xl shadow-card p-6">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-semibold text-gray-900">分润明细</h3>
+              <select id="commissionFilter" class="select select-bordered select-sm" onchange="filterUserCommissions()">
+                <option value="all">所有级别</option>
+                <option value="1">一级分润</option>
+                <option value="2">二级分润</option>
+                <option value="3">三级分润</option>
+                <option value="4">四级分润</option>
+                <option value="5">五级分润</option>
+                <option value="6">六级分润</option>
+                <option value="7">七级分润</option>
+              </select>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="table table-zebra w-full">
+                <thead>
+                  <tr>
+                    <th>来源用户</th>
+                    <th>分润级别</th>
+                    <th>分润比例</th>
+                    <th>分润金额</th>
+                    <th>产生时间</th>
+                  </tr>
+                </thead>
+                <tbody id="commissionTableBody">
+                  <tr>
+                    <td colspan="5" class="text-center text-gray-500 py-8">暂无分润记录</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- 邀请好友 -->
+        <section id="invite" class="section-content hidden">
+          <h2 class="text-2xl font-bold text-gray-900 mb-6">邀请好友</h2>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- 邀请码 -->
+            <div class="bg-white rounded-xl shadow-card p-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">我的邀请码</h3>
+              <div class="space-y-3" id="inviteCodesList">
+                <div class="text-gray-500 text-center py-4">加载中...</div>
+              </div>
+              <div class="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <div class="flex items-start">
+                  <i class="fas fa-info-circle text-yellow-600 mt-1 mr-2"></i>
+                  <div class="text-sm text-yellow-800">
+                    <p class="font-medium">邀请规则：</p>
+                    <ul class="mt-1 space-y-1 text-yellow-700">
+                      <li>• 每个用户最多直推5人</li>
+                      <li>• 激活后自动生成5个邀请码</li>
+                      <li>• 邀请码不可更改</li>
+                      <li>• 享受七级分润机制</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 邀请统计 -->
+            <div class="bg-white rounded-xl shadow-card p-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">邀请统计</h3>
+              <div class="space-y-4">
+                <div class="flex justify-between items-center">
+                  <span class="text-gray-600">已邀请人数：</span>
+                  <span class="font-semibold text-lg" id="invitedCount">0</span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-gray-600">剩余邀请码：</span>
+                  <span class="font-semibold text-lg" id="remainingCodes">5</span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-gray-600">邀请成功率：</span>
+                  <span class="font-semibold text-lg" id="inviteSuccessRate">0%</span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-gray-600">累计邀请收益：</span>
+                  <span class="font-semibold text-lg text-gold" id="inviteEarnings">$0.00</span>
+                </div>
+              </div>
+
+              <div class="mt-6">
+                <h4 class="font-medium text-gray-900 mb-3">快速邀请</h4>
+                <div class="space-y-3">
+                  <button onclick="shareToSocial('wechat')" class="w-full px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors">
+                    <i class="fab fa-weixin mr-2"></i>分享到微信
+                  </button>
+                  <button onclick="shareToSocial('qq')" class="w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
+                    <i class="fab fa-qq mr-2"></i>分享到QQ
+                  </button>
+                  <button onclick="copyInviteLink()" class="w-full px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors">
+                    <i class="fas fa-link mr-2"></i>复制邀请链接
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 邀请记录 -->
+          <div class="bg-white rounded-xl shadow-card p-6 mt-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">邀请记录</h3>
+            <div id="inviteRecords" class="space-y-3">
+              <div class="text-gray-500 text-center py-8">暂无邀请记录</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 个人资料 -->
+        <section id="profile" class="section-content hidden">
+          <h2 class="text-2xl font-bold text-gray-900 mb-6">个人资料</h2>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- 基本信息 -->
+            <div class="bg-white rounded-xl shadow-card p-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">基本信息</h3>
+              <form onsubmit="handleProfileUpdate(event)">
+                <div class="space-y-4">
+                  <div class="form-control">
+                    <label class="label">
+                      <span class="label-text text-gray-700">用户名</span>
+                    </label>
+                    <input type="text" id="profileUsername" class="input input-bordered w-full" readonly>
+                  </div>
+
+                  <div class="form-control">
+                    <label class="label">
+                      <span class="label-text text-gray-700">注册时间</span>
+                    </label>
+                    <input type="text" id="profileRegTime" class="input input-bordered w-full" readonly>
+                  </div>
+
+                  <div class="form-control">
+                    <label class="label">
+                      <span class="label-text text-gray-700">激活状态</span>
+                    </label>
+                    <input type="text" id="profileStatus" class="input input-bordered w-full" readonly>
+                  </div>
+
+                  <div class="form-control">
+                    <label class="label">
+                      <span class="label-text text-gray-700">TRC-20钱包地址</span>
+                    </label>
+                    <input type="text" id="profileWallet" class="input input-bordered w-full" placeholder="请输入USDT钱包地址">
+                    <label class="label">
+                      <span class="label-text-alt text-gray-500">用于接收分润收益</span>
+                    </label>
+                  </div>
+
+                  <div class="form-control mt-6">
+                    <button type="submit" class="btn gradient-gold text-white hover-gold border-none w-full">
+                      保存修改
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </div>
+
+            <!-- 安全设置 -->
+            <div class="bg-white rounded-xl shadow-card p-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">安全设置</h3>
+              <div class="space-y-4">
+                <div class="form-control">
+                  <label class="label">
+                    <span class="label-text text-gray-700">修改密码</span>
+                  </label>
+                  <input type="password" id="oldPassword" class="input input-bordered w-full" placeholder="请输入原密码">
+                </div>
+
+                <div class="form-control">
+                  <input type="password" id="newPassword" class="input input-bordered w-full" placeholder="请输入新密码">
+                </div>
+
+                <div class="form-control">
+                  <input type="password" id="confirmPassword" class="input input-bordered w-full" placeholder="请确认新密码">
+                </div>
+
+                <div class="form-control mt-6">
+                  <button onclick="changePassword()" class="btn bg-red-500 text-white hover:bg-red-600 border-none w-full">
+                    修改密码
+                  </button>
+                </div>
+              </div>
+
+              <div class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <div class="flex items-start">
+                  <i class="fas fa-shield-alt text-blue-600 mt-1 mr-2"></i>
+                  <div class="text-sm text-blue-800">
+                    <p class="font-medium">安全提示：</p>
+                    <ul class="mt-1 space-y-1 text-blue-700">
+                      <li>• 定期更换密码保障账户安全</li>
+                      <li>• 不要将密码告知他人</li>
+                      <li>• 使用复杂的密码组合</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <!-- 引入核心模块 -->
+    <script src="js/config.js"></script>
+    <script src="js/core.js"></script>
+    <script src="js/api.js"></script>
+    
+    <script>
+        let currentUser = null;
+
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                currentUser = await ApiClient.fetch('/auth/user');
+            } catch (e) {
+                ApiClient.clearToken();
+                window.location.href = 'index.html';
+                return;
+            }
+
+            if (!currentUser || !currentUser.id) {
+                ApiClient.clearToken();
+                window.location.href = 'index.html';
+                return;
+            }
+
+            if (currentUser.role === 'admin') {
+                window.location.href = 'admin.html';
+                return;
+            }
+
+            document.getElementById('currentUsername').textContent = Utils.escapeHtml(currentUser.username);
+
+            loadOverview();
+            loadActivationHistory();
+            loadTeamData();
+            loadCommissionData();
+            loadInviteData();
+            loadProfileData();
+        });
+
+        // 显示指定部分
+        function showSection(sectionId) {
+            document.querySelectorAll('.section-content').forEach(section => {
+                section.classList.add('hidden');
+            });
+            
+            document.getElementById(sectionId).classList.remove('hidden');
+            
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('bg-gold', 'text-white');
+                item.classList.add('hover:bg-gray-100', 'text-gray-700');
+            });
+            
+            event.target.classList.add('bg-gold', 'text-white');
+            event.target.classList.remove('hover:bg-gray-100', 'text-gray-700');
+            
+            switch(sectionId) {
+                case 'overview': loadOverview(); break;
+                case 'team': loadTeamData(); break;
+                case 'commissions': loadCommissionData(); break;
+                case 'invite': loadInviteData(); break;
+                case 'profile': loadProfileData(); break;
+            }
+        }
+
+        // 加载总览数据
+        async function loadOverview() {
+            try {
+                currentUser = await ApiClient.fetch('/auth/user');
+
+                const statusElement = document.getElementById('activationStatus');
+                statusElement.textContent = Utils.getStatusText(currentUser.activationStatus);
+                statusElement.className = `text-lg font-bold ${currentUser.activationStatus === 'active' ? 'text-green-600' : 'text-orange-600'}`;
+
+                const team = await ApiClient.fetch('/team/me');
+                document.getElementById('directReferrals').textContent = `${team.directCount}/5`;
+                document.getElementById('teamSize').textContent = team.teamSize;
+
+                const commissions = await ApiClient.fetch('/commissions/me');
+                document.getElementById('totalEarnings').textContent = Utils.formatCurrency(commissions.total || 0);
+            } catch (e) {
+                console.error('loadOverview error:', e);
+            }
+        }
+
+        // 加载激活历史
+        async function loadActivationHistory() {
+            const container = document.getElementById('activationHistory');
+
+            try {
+                const data = await ApiClient.fetch('/activations/me');
+                const userActivations = data.items || [];
+
+                if (userActivations.length === 0) {
+                    container.innerHTML = '<div class="text-gray-500 text-center py-8">暂无激活记录</div>';
+                    return;
+                }
+
+                container.innerHTML = userActivations.map(activation => `
+                    <div class="flex items-center justify-between py-3 border-b border-gray-100 last:border-b-0">
+                        <div>
+                            <div class="font-medium">${Utils.formatCurrency(activation.amount)}</div>
+                            <div class="text-sm text-gray-500">${Utils.formatDate(activation.createdAt)}</div>
+                        </div>
+                        <span class="status-badge status-${activation.status}">${Utils.getStatusText(activation.status)}</span>
+                    </div>
+                `).join('');
+            } catch (e) {
+                console.error('loadActivationHistory error:', e);
+                container.innerHTML = '<div class="text-gray-500 text-center py-8">加载失败</div>';
+            }
+        }
+
+        // 处理激活申请
+        async function handleActivation(event) {
+            event.preventDefault();
+            
+            if (currentUser.activationStatus === 'active') {
+                alert('您的账户已经激活！');
+                return;
+            }
+            
+            const voucherFile = document.getElementById('voucherFile').files[0];
+            const txHash = document.getElementById('txHash').value;
+            
+            // 文件验证
+            const fileCheck = SecurityValidator.validateFile(voucherFile);
+            if (!fileCheck.valid) {
+                alert(fileCheck.error);
+                return;
+            }
+            
+            try {
+                const formData = new FormData();
+                formData.append('txHash', txHash);
+                formData.append('voucher', voucherFile);
+
+                await ApiClient.fetch('/activations', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                alert('激活申请已提交，请等待管理员审核！');
+                document.getElementById('voucherFile').value = '';
+                document.getElementById('txHash').value = '';
+
+                loadActivationHistory();
+            } catch (e) {
+                alert(e.message || '提交失败');
+            }
+        }
+
+        // 加载团队数据
+        async function loadTeamData() {
+            try {
+                const summary = await ApiClient.fetch('/team/me');
+                document.getElementById('directCount').textContent = `${summary.directCount}/5`;
+                document.getElementById('directProgress').style.width = `${(summary.directCount / 5) * 100}%`;
+                document.getElementById('teamTotalCount').textContent = summary.teamSize;
+                document.getElementById('maxDepth').textContent = summary.maxDepth;
+
+                const treeResp = await ApiClient.fetch('/team/me/tree');
+                loadTeamStructure(treeResp.tree || {});
+            } catch (e) {
+                console.error('loadTeamData error:', e);
+            }
+        }
+
+        // 加载团队结构
+        function loadTeamStructure(rootNode) {
+            const container = document.getElementById('teamStructure');
+
+            if (!rootNode || !rootNode.children || rootNode.children.length === 0) {
+                container.innerHTML = '<div class="text-gray-500 text-center py-8">暂无团队成员</div>';
+                return;
+            }
+
+            const buildHtml = (node, level = 0) => {
+                const indent = level * 2;
+                const children = node.children || [];
+
+                return `
+                    <div class="team-node" style="margin-left: ${indent}rem;">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="font-medium">${Utils.escapeHtml(node.username || '未知')}</div>
+                                <div class="text-sm text-gray-500">ID: ${node.id} | ${children.length} 下级</div>
+                            </div>
+                            <span class="status-badge status-${node.activationStatus}">${Utils.getStatusText(node.activationStatus)}</span>
+                        </div>
+                        ${children.map(child => buildHtml(child, level + 1)).join('')}
+                    </div>
+                `;
+            };
+
+            container.innerHTML = rootNode.children.map(child => buildHtml(child)).join('');
+        }
+
+        // 加载分润数据
+        async function loadCommissionData() {
+            let userCommissions = [];
+            try {
+                const data = await ApiClient.fetch('/commissions/me');
+                userCommissions = data.items || [];
+                window.__myCommissions = userCommissions;
+            } catch (e) {
+                console.error('loadCommissionData error:', e);
+            }
+            
+            // 计算收益统计
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const weekStart = new Date(today);
+            weekStart.setDate(today.getDate() - today.getDay());
+            const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+            
+            const todayEarnings = userCommissions
+                .filter(c => new Date(c.createdAt) >= today)
+                .reduce((sum, c) => sum + c.amount, 0);
+            
+            const weekEarnings = userCommissions
+                .filter(c => new Date(c.createdAt) >= weekStart)
+                .reduce((sum, c) => sum + c.amount, 0);
+            
+            const monthEarnings = userCommissions
+                .filter(c => new Date(c.createdAt) >= monthStart)
+                .reduce((sum, c) => sum + c.amount, 0);
+            
+            const totalEarnings = userCommissions.reduce((sum, c) => sum + c.amount, 0);
+            
+            document.getElementById('todayEarnings').textContent = Utils.formatCurrency(todayEarnings);
+            document.getElementById('weekEarnings').textContent = Utils.formatCurrency(weekEarnings);
+            document.getElementById('monthEarnings').textContent = Utils.formatCurrency(monthEarnings);
+            document.getElementById('totalCommissionEarnings').textContent = Utils.formatCurrency(totalEarnings);
+            
+            // 加载分润明细
+            loadCommissionDetails(userCommissions);
+        }
+
+        // 加载分润明细
+        function loadCommissionDetails(commissions) {
+            const tbody = document.getElementById('commissionTableBody');
+            
+            if (commissions.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center text-gray-500 py-8">暂无分润记录</td></tr>';
+                return;
+            }
+            
+            // 按时间倒序排列
+            const sortedCommissions = [...commissions].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            
+            tbody.innerHTML = sortedCommissions.map(commission => `
+                <tr>
+                    <td>${Utils.escapeHtml(commission.fromUsername || '未知用户')}</td>
+                    <td>${commission.level}级分润</td>
+                    <td>${(commission.rate * 100).toFixed(0)}%</td>
+                    <td class="font-semibold text-gold">${Utils.formatCurrency(commission.amount)}</td>
+                    <td>${Utils.formatDate(commission.createdAt)}</td>
+                </tr>
+            `).join('');
+        }
+
+        // 筛选用户分润
+        function filterUserCommissions() {
+            const level = document.getElementById('commissionFilter').value;
+            let userCommissions = window.__myCommissions || [];
+            
+            if (level !== 'all') {
+                userCommissions = userCommissions.filter(c => c.level === parseInt(level));
+            }
+            
+            loadCommissionDetails(userCommissions);
+        }
+
+        // 加载邀请数据
+        async function loadInviteData() {
+            const container = document.getElementById('inviteCodesList');
+
+            try {
+                const codesResp = await ApiClient.fetch('/invite-codes/me');
+                const codes = (codesResp.items || []).filter(c => !c.usedByUserId).map(c => c.code);
+                window.__myInviteCodes = codes;
+
+                if (codes.length === 0) {
+                    container.innerHTML = '<div class="text-gray-500 text-center py-4">暂无邀请码</div>';
+                } else {
+                    container.innerHTML = codes.map(code => `
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <div class="invite-code flex-1">${Utils.escapeHtml(code)}</div>
+                            <button onclick="copyInviteCode('${Utils.escapeHtml(code)}')" class="btn btn-sm btn-ghost ml-2">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    `).join('');
+                }
+
+                const team = await ApiClient.fetch('/team/me');
+                const invitedCount = team.directCount || 0;
+                document.getElementById('invitedCount').textContent = invitedCount;
+                document.getElementById('remainingCodes').textContent = Math.max(0, SYSTEM_CONFIG.DIRECT_REFERRAL_LIMIT - invitedCount);
+                document.getElementById('inviteSuccessRate').textContent = invitedCount > 0 ? '100%' : '0%';
+
+                const userCommissions = window.__myCommissions || [];
+                const inviteEarnings = userCommissions
+                    .filter(c => c.level === 1)
+                    .reduce((sum, c) => sum + c.amount, 0);
+                document.getElementById('inviteEarnings').textContent = Utils.formatCurrency(inviteEarnings);
+
+                const treeResp = await ApiClient.fetch('/team/me/tree');
+                const directNodes = (treeResp.tree && treeResp.tree.children) ? treeResp.tree.children : [];
+                loadInviteRecords(directNodes);
+            } catch (e) {
+                console.error('loadInviteData error:', e);
+                container.innerHTML = '<div class="text-gray-500 text-center py-4">加载失败</div>';
+            }
+        }
+
+        // 加载邀请记录
+        function loadInviteRecords(referredNodes) {
+            const container = document.getElementById('inviteRecords');
+            
+            if (!referredNodes || referredNodes.length === 0) {
+                container.innerHTML = '<div class="text-gray-500 text-center py-8">暂无邀请记录</div>';
+                return;
+            }
+            
+            container.innerHTML = referredNodes.map(node => `
+                <div class="flex items-center justify-between py-3 border-b border-gray-100 last:border-b-0">
+                    <div>
+                        <div class="font-medium">${Utils.escapeHtml(node.username || '未知用户')}</div>
+                        <div class="text-sm text-gray-500">注册时间：${node.createdAt ? Utils.formatDate(node.createdAt) : '-'}</div>
+                    </div>
+                    <span class="status-badge status-${node.activationStatus}">${Utils.getStatusText(node.activationStatus)}</span>
+                </div>
+            `).join('');
+        }
+
+        // 复制邀请码
+        function copyInviteCode(code) {
+            navigator.clipboard.writeText(code).then(() => {
+                alert('邀请码已复制到剪贴板！');
+            }).catch(() => {
+                // 降级方案
+                const textArea = document.createElement('textarea');
+                textArea.value = code;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                alert('邀请码已复制到剪贴板！');
+            });
+        }
+
+        // 分享到社交媒体
+        function shareToSocial(platform) {
+            const inviteCode = (window.__myInviteCodes && window.__myInviteCodes[0]) ? window.__myInviteCodes[0] : '';
+            const message = `加入梦之缘创业投资平台，享受七级分润！邀请码：${inviteCode || '请联系客服获取'}`;
+            
+            switch(platform) {
+                case 'wechat':
+                    alert('请手动复制以下信息分享到微信：\n\n' + message);
+                    copyToClipboard(message);
+                    break;
+                case 'qq':
+                    alert('请手动复制以下信息分享到QQ：\n\n' + message);
+                    copyToClipboard(message);
+                    break;
+            }
+        }
+
+        // 复制邀请链接
+        function copyInviteLink() {
+            const inviteCode = (window.__myInviteCodes && window.__myInviteCodes[0]) ? window.__myInviteCodes[0] : '';
+            const inviteLink = `${window.location.origin}/index.html?invite=${inviteCode}`;
+            copyToClipboard(inviteLink);
+            alert('邀请链接已复制到剪贴板！');
+        }
+
+        // 复制到剪贴板
+        function copyToClipboard(text) {
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(text);
+            } else {
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+            }
+        }
+
+        // 加载个人资料
+        function loadProfileData() {
+            document.getElementById('profileUsername').value = currentUser.username || '';
+            document.getElementById('profileRegTime').value = currentUser.createdAt ? Utils.formatDate(currentUser.createdAt) : '';
+            document.getElementById('profileStatus').value = Utils.getStatusText(currentUser.activationStatus);
+            document.getElementById('profileWallet').value = currentUser.walletAddress || '';
+        }
+
+        // 处理个人资料更新
+        async function handleProfileUpdate(event) {
+            event.preventDefault();
+            
+            const walletAddress = document.getElementById('profileWallet').value.trim();
+            
+            // 验证钱包地址
+            if (walletAddress) {
+                const walletCheck = SecurityValidator.validateInput(walletAddress, 'wallet');
+                if (!walletCheck.valid) {
+                    alert(walletCheck.error);
+                    return;
+                }
+            }
+            
+            try {
+                const data = await ApiClient.fetch('/profile', { method: 'PATCH', body: { walletAddress } });
+                currentUser = data.user;
+                alert('个人资料已更新！');
+            } catch (e) {
+                alert(e.message || '更新失败，请重试');
+            }
+        }
+
+        // 修改密码
+        async function changePassword() {
+            const oldPassword = document.getElementById('oldPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (!oldPassword || !newPassword || !confirmPassword) {
+                alert('请填写所有密码字段！');
+                return;
+            }
+            
+            // 验证新密码
+            const passwordCheck = SecurityValidator.validateInput(newPassword, 'password');
+            if (!passwordCheck.valid) {
+                alert(passwordCheck.error);
+                return;
+            }
+            
+            if (newPassword !== confirmPassword) {
+                alert('新密码与确认密码不一致！');
+                return;
+            }
+            
+            try {
+                await ApiClient.fetch('/password', { method: 'POST', body: { oldPassword, newPassword } });
+
+                document.getElementById('oldPassword').value = '';
+                document.getElementById('newPassword').value = '';
+                document.getElementById('confirmPassword').value = '';
+
+                alert('密码修改成功！');
+            } catch (e) {
+                alert(e.message || '密码修改失败，请重试');
+            }
+        }
+
+        // 退出登录
+        async function logout() {
+            try {
+                await ApiClient.fetch('/auth/logout', { method: 'POST' });
+            } catch (e) {}
+
+            ApiClient.clearToken();
+            window.location.href = 'index.html';
+        }
+    </script>
+  </body>
+
+</html>

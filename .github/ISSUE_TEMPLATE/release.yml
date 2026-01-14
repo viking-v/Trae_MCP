@@ -1,0 +1,58 @@
+name: Release
+description: 上线发布（MCP）
+title: "[Release] "
+labels:
+  - release
+body:
+  - type: dropdown
+    id: checklist_status
+    attributes:
+      label: checklist_status
+      options:
+        - not_started
+        - in_progress
+        - completed
+    validations:
+      required: true
+  - type: dropdown
+    id: rollback_verified
+    attributes:
+      label: rollback_verified
+      options:
+        - "false"
+        - "true"
+    validations:
+      required: true
+  - type: dropdown
+    id: canary_stage
+    attributes:
+      label: canary_stage
+      options:
+        - none
+        - 1%
+        - 10%
+        - 50%
+        - 100%
+    validations:
+      required: true
+  - type: textarea
+    id: checklist
+    attributes:
+      label: Release Checklist
+      description: 用任务清单承载门禁项
+      value: |
+        - [ ] P0/P1 清零
+        - [ ] 核心回归通过
+        - [ ] 回滚演练通过
+        - [ ] 监控报警就绪
+        - [ ] 灰度方案确认
+    validations:
+      required: true
+  - type: input
+    id: owner
+    attributes:
+      label: Owner
+      placeholder: "@username"
+    validations:
+      required: true
+

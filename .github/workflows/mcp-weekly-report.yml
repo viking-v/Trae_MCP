@@ -1,0 +1,36 @@
+name: Weekly MCP Report
+
+on:
+  schedule:
+    - cron: "0 2 * * 1"
+  workflow_dispatch:
+
+permissions:
+  issues: write
+
+jobs:
+  create_weekly_issue:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create weekly report issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const now = new Date()
+            const title = `【MCP周报】${now.toISOString().slice(0,10)}`
+            const body = [
+              "请从 MCP 报表填写：",
+              "- 本周吞吐量",
+              "- 平均 Cycle Time",
+              "- Lead Time",
+              "- 阻塞 Top3",
+              "- 下周风险与行动项"
+            ].join("\n")
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title,
+              body,
+              labels: ["mcp", "report"]
+            })
+

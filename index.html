@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>梦之缘创业投资平台</title>
+    <meta name="description" content="专业的创业投资分润平台，七级分销模式，安全可靠的投资环境">
+    <meta name="keywords" content="创业投资,分润平台,七级分销,投资理财">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- DaisyUI -->
+    <link href="https://cdn.bootcdn.net/ajax/libs/daisyui/4.12.10/full.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+        
+        :root {
+            --primary: 45 100% 50%; /* 金色 */
+            --primary-dark: 45 100% 40%;
+            --secondary: 210 40% 98%; /* 浅灰 */
+            --accent: 0 0% 100%; /* 白色 */
+            --background: 0 0% 99%; /* 极浅灰 */
+            --foreground: 222.2 84% 4.9%; /* 深灰 */
+            --muted: 210 40% 96%;
+            --border: 214.3 31.8% 91.4%;
+            
+            /* 渐变 */
+            --gradient-gold: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-dark)));
+            --gradient-subtle: linear-gradient(180deg, hsl(var(--background)), hsl(var(--muted)));
+            
+            /* 阴影 */
+            --shadow-elegant: 0 10px 30px -10px hsl(var(--primary) / 0.2);
+            --shadow-card: 0 4px 20px hsl(var(--foreground) / 0.08);
+        }
+        
+        body {
+            font-family: 'Noto Sans SC', 'Inter', sans-serif;
+            background: hsl(var(--background));
+            color: hsl(var(--foreground));
+        }
+        
+        .gradient-gold {
+            background: var(--gradient-gold);
+        }
+        
+        .gradient-subtle {
+            background: var(--gradient-subtle);
+        }
+        
+        .shadow-elegant {
+            box-shadow: var(--shadow-elegant);
+        }
+        
+        .shadow-card {
+            box-shadow: var(--shadow-card);
+        }
+        
+        .text-gold {
+            color: hsl(var(--primary));
+        }
+        
+        .bg-gold {
+            background-color: hsl(var(--primary));
+        }
+        
+        .border-gold {
+            border-color: hsl(var(--primary));
+        }
+        
+        .hover-gold:hover {
+            background-color: hsl(var(--primary-dark));
+        }
+        
+        /* 导航栏滚动效果 */
+        .navbar-scrolled {
+            background: hsl(var(--accent) / 0.95);
+            box-shadow: 0 4px 30px hsl(var(--primary) / 0.15);
+            border-bottom-color: hsl(var(--primary) / 0.1);
+        }
+        
+        .navbar-scrolled .nav-link {
+            color: hsl(var(--foreground) / 0.8);
+        }
+        
+        .navbar-scrolled .nav-link:hover {
+            color: hsl(var(--primary));
+        }
+        
+        /* 导航链接激活状态 */
+        .nav-link.active {
+            color: hsl(var(--primary));
+        }
+        
+        .nav-link.active .absolute {
+            width: 100% !important;
+        }
+        
+        /* 按钮悬停波纹效果 */
+        .btn-ripple {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-ripple::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: hsl(var(--primary) / 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        
+        .btn-ripple:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+        
+        /* 导航栏品牌动画 */
+        .brand-glow {
+            animation: brandGlow 3s ease-in-out infinite;
+        }
+        
+        @keyframes brandGlow {
+            0%, 100% {
+                filter: brightness(1);
+            }
+            50% {
+                filter: brightness(1.2) drop-shadow(0 0 20px hsl(var(--primary) / 0.6));
+            }
+        }
+        
+        /* 动画 */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .animate-fadeInUp {
+            animation: fadeInUp 0.6s ease-out;
+        }
+        
+        /* 自定义滚动条 */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: hsl(var(--muted));
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: hsl(var(--primary));
+            border-radius: 3px;
+        }
+        
+        /* 卡片悬停效果 */
+        .card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-elegant);
+        }
+        
+        /* 移动端菜单样式 */
+        .nav-link-mobile {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .nav-link-mobile::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--gradient-gold);
+            transition: width 0.3s ease;
+        }
+        
+        .nav-link-mobile:hover::after {
+            width: 100%;
+        }
+        
+        /* 移动端菜单动画 */
+        #mobileMenu {
+            transform: translateY(-100%);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        #mobileMenu:not(.hidden) {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        /* 移动端按钮响应式调整 */
+        @media (max-width: 640px) {
+            .container {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+            
+            h1.text-xl {
+                font-size: 1.1rem;
+            }
+        }
+        
+        /* 防止移动端菜单打开时页面滚动 */
+        body.mobile-menu-open {
+            overflow: hidden;
+        }
+    </style>
+  </head>
+
+  <body>
+    <!-- 导航栏 -->
+    <nav id="navbar" class="bg-white/90 backdrop-blur-md border-b border-gray-100 sticky top-0 z-50 transition-all duration-300">
+      <div class="container mx-auto px-4">
+        <div class="flex items-center justify-between h-16">
+          <div class="flex items-center space-x-3 group">
+            <div class="w-10 h-10 gradient-gold rounded-xl flex items-center justify-center transform transition-all duration-300 group-hover:scale-110 group-hover:rotate-12">
+              <i class="fas fa-coins text-white text-sm transform transition-all duration-300 group-hover:scale-125"></i>
+            </div>
+            <h1 class="text-xl sm:text-2xl font-bold text-gray-900 transition-all duration-300 group-hover:text-gold">梦之缘投资</h1>
+          </div>
+
+          <!-- 桌面端导航菜单 -->
+          <div class="hidden md:flex items-center space-x-6 lg:space-x-8">
+            <a href="#features" class="nav-link relative text-gray-600 hover:text-gold transition-all duration-300 group">
+              <span class="relative z-10">平台特色</span>
+              <div class="absolute -bottom-1 left-0 w-0 h-0.5 gradient-gold transition-all duration-300 group-hover:w-full"></div>
+            </a>
+            <a href="accounting_templates.html" class="nav-link relative text-gray-600 hover:text-gold transition-all duration-300 group">
+              <span class="relative z-10">分润机制</span>
+              <div class="absolute -bottom-1 left-0 w-0 h-0.5 gradient-gold transition-all duration-300 group-hover:w-full"></div>
+            </a>
+            <a href="seven_level_accounting.html" class="nav-link relative text-gray-600 hover:text-gold transition-all duration-300 group">
+              <span class="relative z-10">七级对账</span>
+              <div class="absolute -bottom-1 left-0 w-0 h-0.5 gradient-gold transition-all duration-300 group-hover:w-full"></div>
+            </a>
+            <a href="#contact" class="nav-link relative text-gray-600 hover:text-gold transition-all duration-300 group">
+              <span class="relative z-10">联系我们</span>
+              <div class="absolute -bottom-1 left-0 w-0 h-0.5 gradient-gold transition-all duration-300 group-hover:w-full"></div>
+            </a>
+          </div>
+
+          <!-- 桌面端按钮组 -->
+          <div class="hidden md:flex items-center space-x-2 lg:space-x-4">
+            <button onclick="showLogin()" class="px-4 py-2 text-gray-700 hover:text-gold transition-all duration-300 relative group overflow-hidden">
+              <span class="relative z-10">登录</span>
+              <div class="absolute inset-00 gradient-gold opacity-0 group-hover:opacity-10 transition-opacity duration-300 rounded-lg"></div>
+            </button>
+            <button onclick="showRegister()" class="px-4 py-2 lg:px-6 lg:py-3 gradient-gold text-white rounded-xl hover-gold transition-all duration-300 shadow-elegant relative group overflow-hidden">
+              <span class="relative z-10">注册</span>
+              <div class="absolute inset-0 bg-white/20 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
+            </button>
+          </div>
+
+          <!-- 移动端菜单按钮 -->
+          <div class="md:hidden">
+            <button id="mobileMenuBtn" class="btn btn-ghost btn-circle">
+              <i class="fas fa-bars text-xl"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- 移动端导航菜单 -->
+        <div id="mobileMenu" class="md:hidden hidden absolute top-16 left-0 right-0 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-lg">
+          <div class="container mx-auto px-4 py-4">
+            <div class="flex flex-col space-y-4">
+              <a href="#features" class="nav-link-mobile py-3 text-gray-700 hover:text-gold transition-all duration-300 font-medium">
+                平台特色
+              </a>
+              <a href="accounting_templates.html" class="nav-link-mobile py-3 text-gray-700 hover:text-gold transition-all duration-300 font-medium">
+                分润机制
+              </a>
+              <a href="seven_level_accounting.html" class="nav-link-mobile py-3 text-gray-700 hover:text-gold transition-all duration-300 font-medium">
+                七级对账
+              </a>
+              <a href="#contact" class="nav-link-mobile py-3 text-gray-700 hover:text-gold transition-all duration-300 font-medium">
+                联系我们
+              </a>
+              <div class="flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-200">
+                <button onclick="showLogin()" class="w-full sm:w-auto px-6 py-3 text-gray-700 hover:text-gold transition-all duration-300 border border-gray-300 rounded-xl">
+                  登录
+                </button>
+                <button onclick="showRegister()" class="w-full sm:w-auto px-6 py-3 gradient-gold text-white rounded-xl hover-gold transition-all duration-300 shadow-elegant">
+                  注册
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <main>
+      <!-- Hero 区域 -->
+      <section class="relative overflow-hidden bg-gradient-to-br from-gray-50 to-white py-20">
+        <div class="container mx-auto px-4">
+          <div class="max-w-4xl mx-auto text-center">
+            <h2 class="text-4xl md:text-6xl font-bold text-gray-900 mb-6 animate-fadeInUp">
+              专业投资
+              <span class="text-gold">分润平台</span>
+            </h2>
+            <p class="text-xl text-gray-600 mb-8 max-w-2xl mx-auto animate-fadeInUp" style="animation-delay: 0.2s;">
+              七级分销模式，安全可靠的投资环境，助您实现财富增长梦想
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center animate-fadeInUp" style="animation-delay: 0.4s;">
+              <button onclick="showRegister()" class="px-8 py-4 gradient-gold text-white rounded-xl hover-gold transition-all shadow-elegant text-lg font-medium">
+                立即注册
+              </button>
+              <button onclick="scrollToProfit()" class="px-8 py-4 bg-white text-gray-700 rounded-xl border border-gray-200 hover:border-gold transition-all text-lg font-medium">
+                了解分润
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 装饰性元素 -->
+        <div class="absolute top-20 left-10 w-20 h-20 bg-gold/10 rounded-full blur-xl"></div>
+        <div class="absolute bottom-20 right-10 w-32 h-32 bg-gold/5 rounded-full blur-2xl"></div>
+      </section>
+
+      <!-- 平台特色 -->
+      <section id="features" class="py-20 bg-white">
+        <div class="container mx-auto px-4">
+          <div class="text-center mb-16">
+            <h3 class="text-3xl font-bold text-gray-900 mb-4">平台特色</h3>
+            <p class="text-gray-600 max-w-2xl mx-auto">专业的投资分润机制，安全可靠的平台保障</p>
+          </div>
+
+          <div class="grid md:grid-cols-3 gap-8">
+            <div class="card-hover bg-gradient-to-br from-gray-50 to-white p-8 rounded-2xl border border-gray-100">
+              <div class="w-12 h-12 gradient-gold rounded-xl flex items-center justify-center mb-6">
+                <i class="fas fa-shield-alt text-white text-xl"></i>
+              </div>
+              <h4 class="text-xl font-semibold text-gray-900 mb-4">安全可靠</h4>
+              <p class="text-gray-600">人工审核模式，确保每一笔充值和激活都经过严格验证，保障用户资金安全。</p>
+            </div>
+
+            <div class="card-hover bg-gradient-to-br from-gray-50 to-white p-8 rounded-2xl border border-gray-100">
+              <div class="w-12 h-12 gradient-gold rounded-xl flex items-center justify-center mb-6">
+                <i class="fas fa-sitemap text-white text-xl"></i>
+              </div>
+              <h4 class="text-xl font-semibold text-gray-900 mb-4">七级分润</h4>
+              <p class="text-gray-600">科学的分润机制，一级20%、二级8%、三级8%、四级6%、五级5%、六级5%、七级5%。</p>
+            </div>
+
+            <div class="card-hover bg-gradient-to-br from-gray-50 to-white p-8 rounded-2xl border border-gray-100">
+              <div class="w-12 h-12 gradient-gold rounded-xl flex items-center justify-center mb-6">
+                <i class="fas fa-users text-white text-xl"></i>
+              </div>
+              <h4 class="text-xl font-semibold text-gray-900 mb-4">团队管理</h4>
+              <p class="text-gray-600">完善的团队结构展示，清晰查看下级成员和分润收益，助力团队发展。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 分润机制 -->
+      <section id="profit" class="py-20 gradient-subtle">
+        <div class="container mx-auto px-4">
+          <div class="text-center mb-16">
+            <h3 class="text-3xl font-bold text-gray-900 mb-4">七级分润机制</h3>
+            <p class="text-gray-600 max-w-2xl mx-auto">透明公正的分润比例，总分配比例57%</p>
+          </div>
+
+          <div class="max-w-4xl mx-auto">
+            <div class="grid md:grid-cols-7 gap-4 mb-8">
+              <div class="text-center">
+                <div class="w-16 h-16 gradient-gold rounded-full flex items-center justify-center mx-auto mb-3">
+                  <span class="text-white font-bold">1级</span>
+                </div>
+                <div class="text-2xl font-bold text-gold mb-1">20%</div>
+                <div class="text-sm text-gray-600">直推奖励</div>
+              </div>
+              <div class="text-center">
+                <div class="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <span class="text-gray-700 font-bold">2级</span>
+                </div>
+                <div class="text-2xl font-bold text-gray-700 mb-1">8%</div>
+                <div class="text-sm text-gray-600">间接奖励</div>
+              </div>
+              <div class="text-center">
+                <div class="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <span class="text-gray-700 font-bold">3级</span>
+                </div>
+                <div class="text-2xl font-bold text-gray-700 mb-1">8%</div>
+                <div class="text-sm text-gray-600">间接奖励</div>
+              </div>
+              <div class="text-center">
+                <div class="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <span class="text-gray-700 font-bold">4级</span>
+                </div>
+                <div class="text-2xl font-bold text-gray-700 mb-1">6%</div>
+                <div class="text-sm text-gray-600">间接奖励</div>
+              </div>
+              <div class="text-center">
+                <div class="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <span class="text-gray-700 font-bold">5级</span>
+                </div>
+                <div class="text-2xl font-bold text-gray-700 mb-1">5%</div>
+                <div class="text-sm text-gray-600">间接奖励</div>
+              </div>
+              <div class="text-center">
+                <div class="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <span class="text-gray-700 font-bold">6级</span>
+                </div>
+                <div class="text-2xl font-bold text-gray-700 mb-1">5%</div>
+                <div class="text-sm text-gray-600">间接奖励</div>
+              </div>
+              <div class="text-center">
+                <div class="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <span class="text-gray-700 font-bold">7级</span>
+                </div>
+                <div class="text-2xl font-bold text-gray-700 mb-1">5%</div>
+                <div class="text-sm text-gray-600">间接奖励</div>
+              </div>
+            </div>
+
+            <div class="bg-white rounded-2xl p-8 shadow-card">
+              <h4 class="text-xl font-semibold text-gray-900 mb-6 text-center">激活规则</h4>
+              <div class="grid md:grid-cols-2 gap-6">
+                <div class="space-y-4">
+                  <div class="flex items-center space-x-3">
+                    <div class="w-6 h-6 gradient-gold rounded-full flex items-center justify-center">
+                      <i class="fas fa-check text-white text-xs"></i>
+                    </div>
+                    <span class="text-gray-700">激活金额：$300 USD</span>
+                  </div>
+                  <div class="flex items-center space-x-3">
+                    <div class="w-6 h-6 gradient-gold rounded-full flex items-center justify-center">
+                      <i class="fas fa-check text-white text-xs"></i>
+                    </div>
+                    <span class="text-gray-700">直推上限：5人</span>
+                  </div>
+                  <div class="flex items-center space-x-3">
+                    <div class="w-6 h-6 gradient-gold rounded-full flex items-center justify-center">
+                      <i class="fas fa-check text-white text-xs"></i>
+                    </div>
+                    <span class="text-gray-700">自动生成：5个邀请码</span>
+                  </div>
+                </div>
+                <div class="space-y-4">
+                  <div class="flex items-center space-x-3">
+                    <div class="w-6 h-6 gradient-gold rounded-full flex items-center justify-center">
+                      <i class="fas fa-check text-white text-xs"></i>
+                    </div>
+                    <span class="text-gray-700">最大深度：7级</span>
+                  </div>
+                  <div class="flex items-center space-x-3">
+                    <div class="w-6 h-6 gradient-gold rounded-full flex items-center justify-center">
+                      <i class="fas fa-check text-white text-xs"></i>
+                    </div>
+                    <span class="text-gray-700">人工审核：安全可靠</span>
+                  </div>
+                  <div class="flex items-center space-x-3">
+                    <div class="w-6 h-6 gradient-gold rounded-full flex items-center justify-center">
+                      <i class="fas fa-check text-white text-xs"></i>
+                    </div>
+                    <span class="text-gray-700">TRC-20钱包：支持USDT</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 联系我们 -->
+      <section id="contact" class="py-20 bg-white">
+        <div class="container mx-auto px-4">
+          <div class="max-w-2xl mx-auto text-center">
+            <h3 class="text-3xl font-bold text-gray-900 mb-4">开始您的投资之旅</h3>
+            <p class="text-gray-600 mb-8">加入梦之缘，开启财富增长新篇章</p>
+            <button onclick="showRegister()" class="px-8 py-4 gradient-gold text-white rounded-xl hover-gold transition-all shadow-elegant text-lg font-medium">
+              立即注册会员
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- 登录模态框 -->
+    <dialog id="loginModal" class="modal">
+      <div class="modal-box max-w-md bg-white">
+        <form method="dialog">
+          <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+        </form>
+        <h3 class="text-xl font-bold text-gray-900 mb-6">用户登录</h3>
+        <form onsubmit="handleLogin(event)">
+          <div class="space-y-4">
+            <div class="form-control">
+              <label class="label">
+                <span class="label-text text-gray-700">邮箱</span>
+              </label>
+              <input type="email" id="loginUsername" class="input input-bordered w-full" required>
+            </div>
+            <div class="form-control">
+              <label class="label">
+                <span class="label-text text-gray-700">密码</span>
+              </label>
+              <input type="password" id="loginPassword" class="input input-bordered w-full" required>
+            </div>
+            <div class="form-control mt-6">
+              <button type="submit" class="btn gradient-gold text-white hover-gold border-none w-full">登录</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </dialog>
+
+    <!-- 注册模态框 -->
+    <dialog id="registerModal" class="modal">
+      <div class="modal-box max-w-md bg-white">
+        <form method="dialog">
+          <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+        </form>
+        <h3 class="text-xl font-bold text-gray-900 mb-6">用户注册</h3>
+        <form onsubmit="handleRegister(event)">
+          <div class="space-y-4">
+            <div class="form-control">
+            <label class="label">
+              <span class="label-text text-gray-700">用户名</span>
+            </label>
+            <input type="text" id="regUsername" class="input input-bordered w-full" required>
+          </div>
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text text-gray-700">邮箱</span>
+            </label>
+            <input type="email" id="regEmail" class="input input-bordered w-full" required>
+          </div>
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text text-gray-700">密码</span>
+            </label>
+            <input type="password" id="regPassword" class="input input-bordered w-full" required>
+          </div>
+            <div class="form-control">
+              <label class="label">
+                <span class="label-text text-gray-700">邀请码（可选）</span>
+              </label>
+              <input type="text" id="regInviteCode" class="input input-bordered w-full" placeholder="请输入邀请码">
+            </div>
+            <div class="form-control">
+              <label class="label">
+                <span class="label-text text-gray-700">TRC-20钱包地址</span>
+              </label>
+              <input type="text" id="regWallet" class="input input-bordered w-full" placeholder="请输入USDT钱包地址">
+            </div>
+            <div class="form-control mt-6">
+              <button type="submit" class="btn gradient-gold text-white hover-gold border-none w-full">注册</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </dialog>
+
+    <!-- 引入核心模块 -->
+    <script src="js/config.js"></script>
+    <script src="js/core.js"></script>
+    <script src="js/api.js"></script>
+    
+    <script>
+        // 显示登录模态框
+        function showLogin() {
+            document.getElementById('loginModal').showModal();
+        }
+
+        // 显示注册模态框
+        function showRegister() {
+            document.getElementById('registerModal').showModal();
+            try {
+                const params = new URLSearchParams(window.location.search);
+                const invite = params.get('invite');
+                if (invite) {
+                    document.getElementById('regInviteCode').value = invite;
+                }
+            } catch (e) {}
+        }
+
+        // 处理登录
+        async function handleLogin(event) {
+            event.preventDefault();
+            const email = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            
+            // 输入验证
+            if (!email) {
+                alert('请输入邮箱');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${SYSTEM_CONFIG.API_BASE_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    localStorage.setItem('auth_token', data.access_token);
+                    SessionManager.setCurrentUser(data.user);
+                    
+                    if (data.user.role === 'admin') {
+                        window.location.href = 'admin.html';
+                    } else {
+                        window.location.href = 'dashboard.html';
+                    }
+                } else {
+                    alert(data.message || '登录失败');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                alert('系统错误，请稍后重试');
+            }
+        }
+
+        // 处理注册
+        async function handleRegister(event) {
+            event.preventDefault();
+            const name = document.getElementById('regUsername').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const password = document.getElementById('regPassword').value;
+            const inviteCode = document.getElementById('regInviteCode').value.trim();
+            const walletAddress = document.getElementById('regWallet').value.trim();
+            
+            // 输入验证
+            if (!name) {
+                alert('请输入用户名');
+                return;
+            }
+            if (!email) {
+                alert('请输入邮箱');
+                return;
+            }
+            if (!password || password.length < 8) {
+                alert('密码长度至少8位');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${SYSTEM_CONFIG.API_BASE_URL}/auth/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ name, email, password, inviteCode: inviteCode || null, walletAddress: walletAddress || null })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    alert('注册成功！');
+                    document.getElementById('registerModal').close();
+                    
+                    // 清空表单
+                    document.getElementById('regUsername').value = '';
+                    document.getElementById('regEmail').value = '';
+                    document.getElementById('regPassword').value = '';
+                } else {
+                    alert(data.message || '注册失败');
+                }
+            } catch (error) {
+                console.error('Register error:', error);
+                alert('系统错误，请稍后重试');
+            }
+        }
+
+        // 处理邀请关系
+        function handleInvitation(newUserId, inviteCode) {
+            const inviter = UserManager.getUserByInviteCode(inviteCode);
+            
+            if (inviter && inviter.referredUsers.length < SYSTEM_CONFIG.DIRECT_REFERRAL_LIMIT) {
+                inviter.referredUsers.push(newUserId);
+                UserManager.updateUser(inviter.id, { referredUsers: inviter.referredUsers });
+            }
+        }
+
+        // 滚动到分润部分
+        function scrollToProfit() {
+            document.getElementById('profit').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // 导航栏交互效果
+        function initNavbarEffects() {
+            const navbar = document.getElementById('navbar');
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            // 滚动效果
+            let lastScrollTop = 0;
+            window.addEventListener('scroll', function() {
+                const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                
+                // 添加滚动样式
+                if (scrollTop > 50) {
+                    navbar.classList.add('navbar-scrolled');
+                } else {
+                    navbar.classList.remove('navbar-scrolled');
+                }
+                
+                // 导航高亮
+                updateActiveNavLink();
+                
+                lastScrollTop = scrollTop;
+            });
+            
+            // 导航链接点击效果
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    // 移除所有激活状态
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    // 添加激活状态
+                    this.classList.add('active');
+                    
+                    // 添加点击波纹效果
+                    createRippleEffect(e, this);
+                });
+                
+                // 鼠标进入效果
+                link.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-2px)';
+                });
+                
+                // 鼠标离开效果
+                link.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                });
+            });
+            
+            // 品牌logo动画
+            const brandLogo = document.querySelector('.group');
+            setInterval(() => {
+                brandLogo.classList.add('brand-glow');
+                setTimeout(() => {
+                    brandLogo.classList.remove('brand-glow');
+                }, 1000);
+            }, 5000);
+        }
+        
+        // 更新激活的导航链接
+        function updateActiveNavLink() {
+            const sections = document.querySelectorAll('section[id]');
+            const navLinks = document.querySelectorAll('.nav-link');
+            let current = '';
+            
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (window.pageYOffset >= sectionTop - 200) {
+                    current = section.getAttribute('id');
+                }
+            });
+            
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('active');
+                }
+            });
+        }
+        
+        // 创建波纹效果
+        function createRippleEffect(e, element) {
+            const ripple = document.createElement('span');
+            const rect = element.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = e.clientX - rect.left - size / 2;
+            const y = e.clientY - rect.top - size / 2;
+            
+            ripple.style.width = ripple.style.height = size + 'px';
+            ripple.style.left = x + 'px';
+            ripple.style.top = y + 'px';
+            ripple.classList.add('ripple');
+            
+            element.appendChild(ripple);
+            
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+        }
+        
+        // 移动端菜单功能
+        function initMobileMenu() {
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            const mobileMenu = document.getElementById('mobileMenu');
+            const mobileNavLinks = document.querySelectorAll('.nav-link-mobile');
+            
+            // 切换移动端菜单
+            function toggleMobileMenu() {
+                mobileMenu.classList.toggle('hidden');
+                document.body.classList.toggle('mobile-menu-open');
+                
+                // 更新按钮图标
+                const icon = mobileMenuBtn.querySelector('i');
+                if (mobileMenu.classList.contains('hidden')) {
+                    icon.className = 'fas fa-bars text-xl';
+                } else {
+                    icon.className = 'fas fa-times text-xl';
+                }
+            }
+            
+            // 关闭移动端菜单
+            function closeMobileMenu() {
+                mobileMenu.classList.add('hidden');
+                document.body.classList.remove('mobile-menu-open');
+                const icon = mobileMenuBtn.querySelector('i');
+                icon.className = 'fas fa-bars text-xl';
+            }
+            
+            // 绑定菜单按钮点击事件
+            mobileMenuBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                toggleMobileMenu();
+            });
+            
+            // 绑定移动端导航链接点击事件
+            mobileNavLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    closeMobileMenu();
+                    
+                    // 添加点击波纹效果
+                    createRippleEffect(event, this);
+                    
+                    // 平滑滚动到目标区域
+                    const href = this.getAttribute('href');
+                    if (href.startsWith('#')) {
+                        const target = document.querySelector(href);
+                        if (target) {
+                            target.scrollIntoView({ behavior: 'smooth' });
+                        }
+                    }
+                });
+            });
+            
+            // 点击外部关闭菜单
+            document.addEventListener('click', function(e) {
+                if (!mobileMenu.classList.contains('hidden')) {
+                    if (!mobileMenu.contains(e.target) && e.target !== mobileMenuBtn) {
+                        closeMobileMenu();
+                    }
+                }
+            });
+            
+            // 窗口大小改变时关闭菜单
+            window.addEventListener('resize', function() {
+                if (window.innerWidth >= 768) {
+                    closeMobileMenu();
+                }
+            });
+            
+            // 滚动时关闭菜单
+            window.addEventListener('scroll', function() {
+                if (!mobileMenu.classList.contains('hidden')) {
+                    closeMobileMenu();
+                }
+            });
+        }
+        
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 核心模块已自动初始化
+            initNavbarEffects();
+            initMobileMenu();
+        });
+    </script>
+  </body>
+
+</html>

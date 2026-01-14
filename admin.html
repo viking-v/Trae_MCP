@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理员后台 - 梦之缘创业投资平台</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- DaisyUI -->
+    <link href="https://cdn.bootcdn.net/ajax/libs/daisyui/4.12.10/full.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- 核心模块 -->
+    <script src="js/config.js"></script>
+    <script src="js/core.js"></script>
+    <script src="js/api.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+        
+        :root {
+            --primary: 45 100% 50%;
+            --primary-dark: 45 100% 40%;
+            --secondary: 210 40% 98%;
+            --accent: 0 0% 100%;
+            --background: 0 0% 99%;
+            --foreground: 222.2 84% 4.9%;
+            --muted: 210 40% 96%;
+            --border: 214.3 31.8% 91.4%;
+            
+            --gradient-gold: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-dark)));
+            --gradient-subtle: linear-gradient(180deg, hsl(var(--background)), hsl(var(--muted)));
+            
+            --shadow-elegant: 0 10px 30px -10px hsl(var(--primary) / 0.2);
+            --shadow-card: 0 4px 20px hsl(var(--foreground) / 0.08);
+        }
+        
+        body {
+            font-family: 'Noto Sans SC', 'Inter', sans-serif;
+            background: hsl(var(--background));
+            color: hsl(var(--foreground));
+        }
+        
+        .gradient-gold {
+            background: var(--gradient-gold);
+        }
+        
+        .text-gold {
+            color: hsl(var(--primary));
+        }
+        
+        .bg-gold {
+            background-color: hsl(var(--primary));
+        }
+        
+        .hover-gold:hover {
+            background-color: hsl(var(--primary-dark));
+        }
+        
+        .shadow-card {
+            box-shadow: var(--shadow-card);
+        }
+        
+        .card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-elegant);
+        }
+        
+        /* 自定义滚动条 */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: hsl(var(--muted));
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: hsl(var(--primary));
+            border-radius: 3px;
+        }
+        
+        /* 表格样式 */
+        .table-zebra tbody tr:nth-child(even) {
+            background-color: hsl(var(--secondary));
+        }
+        
+        .table-zebra tbody tr:hover {
+            background-color: hsl(var(--muted));
+        }
+        
+        /* 状态标签 */
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .status-pending {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+        
+        .status-approved {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status-rejected {
+            background-color: #fee2e2;
+            color: #991b1b;
+            max-width: 100%;
+            overflow-wrap: break-word;
+        }
+        
+        .status-active {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+    </style>
+  </head>
+
+  <body>
+    <!-- 顶部导航 -->
+    <nav class="bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50">
+      <div class="container mx-auto px-4">
+        <div class="flex items-center justify-between h-16">
+          <div class="flex items-center space-x-2">
+            <div class="w-8 h-8 gradient-gold rounded-lg flex items-center justify-center">
+              <i class="fas fa-coins text-white text-sm"></i>
+            </div>
+            <h1 class="text-xl font-bold text-gray-900">梦之缘投资 - 管理后台</h1>
+          </div>
+
+          <div class="flex items-center space-x-4">
+            <div class="text-sm text-gray-600">
+              欢迎，管理员
+            </div>
+            <button onclick="logout()" class="px-4 py-2 text-gray-600 hover:text-red-600 transition-colors">
+              <i class="fas fa-sign-out-alt mr-2"></i>退出
+            </button>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <div class="flex">
+      <!-- 侧边栏 -->
+      <aside class="w-64 bg-white border-r border-gray-200 min-h-screen">
+        <div class="p-4">
+          <nav class="space-y-2">
+            <button onclick="showSection('dashboard')" class="nav-item w-full text-left px-4 py-3 rounded-lg bg-gold text-white">
+              <i class="fas fa-tachometer-alt mr-3"></i>仪表盘
+            </button>
+            <button onclick="showSection('activations')" class="nav-item w-full text-left px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700">
+              <i class="fas fa-check-circle mr-3"></i>充值审核
+            </button>
+            <button onclick="showSection('users')" class="nav-item w-full text-left px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700">
+              <i class="fas fa-users mr-3"></i>会员管理
+            </button>
+            <button onclick="showSection('commissions')" class="nav-item w-full text-left px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700">
+              <i class="fas fa-chart-line mr-3"></i>分润记录
+            </button>
+            <button onclick="showSection('settings')" class="nav-item w-full text-left px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700">
+              <i class="fas fa-cog mr-3"></i>系统设置
+            </button>
+          </nav>
+        </div>
+      </aside>
+
+      <!-- 主内容区 -->
+      <main class="flex-1 p-6">
+        <!-- 仪表盘 -->
+        <section id="dashboard" class="section-content">
+          <h2 class="text-2xl font-bold text-gray-900 mb-6">仪表盘</h2>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="card-hover bg-white p-6 rounded-xl shadow-card">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-gray-600 text-sm">总会员数</p>
+                  <p class="text-2xl font-bold text-gray-900" id="totalUsers">0</p>
+                </div>
+                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <i class="fas fa-users text-blue-600"></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="card-hover bg-white p-6 rounded-xl shadow-card">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-gray-600 text-sm">已激活会员</p>
+                  <p class="text-2xl font-bold text-green-600" id="activeUsers">0</p>
+                </div>
+                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                  <i class="fas fa-user-check text-green-600"></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="card-hover bg-white p-6 rounded-xl shadow-card">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-gray-600 text-sm">待审核充值</p>
+                  <p class="text-2xl font-bold text-orange-600" id="pendingActivations">0</p>
+                </div>
+                <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                  <i class="fas fa-clock text-orange-600"></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="card-hover bg-white p-6 rounded-xl shadow-card">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-gray-600 text-sm">总分润金额</p>
+                  <p class="text-2xl font-bold text-gold" id="totalCommissions">$0</p>
+                </div>
+                <div class="w-12 h-12 gradient-gold rounded-lg flex items-center justify-center">
+                  <i class="fas fa-dollar-sign text-white"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 最近活动 -->
+          <div class="bg-white rounded-xl shadow-card p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">最近活动</h3>
+            <div id="recentActivities" class="space-y-3">
+              <div class="text-gray-500 text-center py-8">暂无活动记录</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 充值审核 -->
+        <section id="activations" class="section-content hidden">
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-bold text-gray-900">充值审核</h2>
+            <button onclick="loadActivations()" class="px-4 py-2 bg-gold text-white rounded-lg hover-gold transition-colors">
+              <i class="fas fa-sync-alt mr-2"></i>刷新
+            </button>
+          </div>
+
+          <div class="bg-white rounded-xl shadow-card overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="table table-zebra w-full">
+                <thead>
+                  <tr>
+                    <th>用户</th>
+                    <th>金额</th>
+                    <th>凭证</th>
+                    <th>提交时间</th>
+                    <th>状态</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody id="activationsTableBody">
+                  <tr>
+                    <td colspan="6" class="text-center text-gray-500 py-8">暂无待审核记录</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- 会员管理 -->
+        <section id="users" class="section-content hidden">
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-bold text-gray-900">会员管理</h2>
+            <div class="flex space-x-3">
+              <input type="text" id="userSearch" placeholder="搜索用户名..." class="input input-bordered input-sm">
+              <button onclick="searchUsers()" class="px-4 py-2 bg-gold text-white rounded-lg hover-gold transition-colors">
+                <i class="fas fa-search mr-2"></i>搜索
+              </button>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-xl shadow-card overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="table table-zebra w-full">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>用户名</th>
+                    <th>激活状态</th>
+                    <th>直推人数</th>
+                    <th>钱包地址</th>
+                    <th>注册时间</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody id="usersTableBody">
+                  <tr>
+                    <td colspan="7" class="text-center text-gray-500 py-8">暂无会员数据</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- 分润记录 -->
+        <section id="commissions" class="section-content hidden">
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-bold text-gray-900">分润记录</h2>
+            <div class="flex space-x-3">
+              <select id="commissionLevel" class="select select-bordered select-sm">
+                <option value="">所有级别</option>
+                <option value="1">一级分润</option>
+                <option value="2">二级分润</option>
+                <option value="3">三级分润</option>
+                <option value="4">四级分润</option>
+                <option value="5">五级分润</option>
+                <option value="6">六级分润</option>
+                <option value="7">七级分润</option>
+              </select>
+              <button onclick="filterCommissions()" class="px-4 py-2 bg-gold text-white rounded-lg hover-gold transition-colors">
+                <i class="fas fa-filter mr-2"></i>筛选
+              </button>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-xl shadow-card overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="table table-zebra w-full">
+                <thead>
+                  <tr>
+                    <th>来源用户</th>
+                    <th>受益用户</th>
+                    <th>级别</th>
+                    <th>分润比例</th>
+                    <th>分润金额</th>
+                    <th>产生时间</th>
+                  </tr>
+                </thead>
+                <tbody id="commissionsTableBody">
+                  <tr>
+                    <td colspan="6" class="text-center text-gray-500 py-8">暂无分润记录</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- 系统设置 -->
+        <section id="settings" class="section-content hidden">
+          <h2 class="text-2xl font-bold text-gray-900 mb-6">系统设置</h2>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-white rounded-xl shadow-card p-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">基础配置</h3>
+              <div class="space-y-4">
+                <div class="form-control">
+                  <label class="label">
+                    <span class="label-text text-gray-700">货币单位</span>
+                  </label>
+                  <input type="text" value="USD" class="input input-bordered" readonly>
+                </div>
+                <div class="form-control">
+                  <label class="label">
+                    <span class="label-text text-gray-700">激活金额 ($)</span>
+                  </label>
+                  <input type="number" value="300" class="input input-bordered" readonly>
+                </div>
+                <div class="form-control">
+                  <label class="label">
+                    <span class="label-text text-gray-700">直推上限</span>
+                  </label>
+                  <input type="number" value="5" class="input input-bordered" readonly>
+                </div>
+                <div class="form-control">
+                  <label class="label">
+                    <span class="label-text text-gray-700">最大深度</span>
+                  </label>
+                  <input type="number" value="7" class="input input-bordered" readonly>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-card p-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">分润比例</h3>
+              <div class="space-y-3">
+                <div class="flex justify-between items-center">
+                  <span class="text-gray-700">一级分润</span>
+                  <span class="font-semibold text-gold">20%</span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-gray-700">二级分润</span>
+                  <span class="font-semibold text-gray-600">8%</span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-gray-700">三级分润</span>
+                  <span class="font-semibold text-gray-600">8%</span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-gray-700">四级分润</span>
+                  <span class="font-semibold text-gray-600">6%</span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-gray-700">五级分润</span>
+                  <span class="font-semibold text-gray-600">5%</span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-gray-700">六级分润</span>
+                  <span class="font-semibold text-gray-600">5%</span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-gray-700">七级分润</span>
+                  <span class="font-semibold text-gray-600">5%</span>
+                </div>
+                <div class="border-t pt-3 mt-3">
+                  <div class="flex justify-between items-center font-semibold">
+                    <span class="text-gray-900">总计</span>
+                    <span class="text-gold">57%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script>
+        let adminUser = null;
+        
+        // 页面加载时检查权限
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                adminUser = await ApiClient.fetch('/auth/user');
+            } catch (e) {
+                ApiClient.clearToken();
+                window.location.href = 'admin_login.html';
+                return;
+            }
+
+            if (!adminUser || adminUser.role !== 'admin') {
+                window.location.href = 'dashboard.html';
+                return;
+            }
+
+            const welcomeEl = document.querySelector('.text-sm.text-gray-600');
+            if (welcomeEl) {
+                welcomeEl.innerHTML = `欢迎，管理员 - ${Utils.escapeHtml(adminUser.username)}`;
+            }
+
+            loadDataBasedOnPermissions(adminUser);
+        });
+
+        // 根据权限初始化界面
+        function initializePermissionUI(user) {
+            // 更新欢迎信息，显示角色名称
+            const roleInfo = PermissionManager.getRoleInfo(user);
+            if (roleInfo) {
+                document.querySelector('.text-sm.text-gray-600').innerHTML = 
+                    `欢迎，${roleInfo.name} - ${Utils.escapeHtml(user.username)}`;
+            }
+            
+            // 根据权限显示/隐藏导航菜单
+            updateNavigationBasedOnPermissions(user);
+        }
+
+        // 根据权限更新导航菜单
+        function updateNavigationBasedOnPermissions(user) {
+            const navItems = {
+                'dashboard': PermissionManager.hasPermission(user, 'dashboard.view'),
+                'activations': PermissionManager.hasPermission(user, 'activations.view'),
+                'users': PermissionManager.hasPermission(user, 'users.view'),
+                'commissions': PermissionManager.hasPermission(user, 'commissions.view'),
+                'settings': PermissionManager.hasPermission(user, 'settings.view')
+            };
+            
+            // 隐藏没有权限的导航项
+            Object.keys(navItems).forEach(sectionId => {
+                if (!navItems[sectionId]) {
+                    const navButton = document.querySelector(`button[onclick="showSection('${sectionId}')"]`);
+                    if (navButton) {
+                        navButton.style.display = 'none';
+                    }
+                }
+            });
+            
+            // 如果没有仪表盘权限，默认显示第一个有权限的页面
+            if (!navItems['dashboard']) {
+                const firstAvailableSection = Object.keys(navItems).find(key => navItems[key]);
+                if (firstAvailableSection) {
+                    setTimeout(() => showSection(firstAvailableSection), 100);
+                }
+            }
+        }
+
+        // 根据权限加载数据
+        function loadDataBasedOnPermissions(user) {
+            loadDashboard();
+            loadActivations();
+            loadUsers();
+            loadCommissions();
+        }
+
+        // 显示指定部分
+        function showSection(sectionId) {
+            // 隐藏所有部分
+            document.querySelectorAll('.section-content').forEach(section => {
+                section.classList.add('hidden');
+            });
+            
+            // 显示指定部分
+            document.getElementById(sectionId).classList.remove('hidden');
+            
+            // 更新导航状态
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('bg-gold', 'text-white');
+                item.classList.add('hover:bg-gray-100', 'text-gray-700');
+            });
+            
+            event.target.classList.add('bg-gold', 'text-white');
+            event.target.classList.remove('hover:bg-gray-100', 'text-gray-700');
+            
+            // 加载对应数据
+            switch(sectionId) {
+                case 'dashboard':
+                    loadDashboard();
+                    break;
+                case 'activations':
+                    loadActivations();
+                    break;
+                case 'users':
+                    loadUsers();
+                    break;
+                case 'commissions':
+                    loadCommissions();
+                    break;
+            }
+        }
+
+        // 加载仪表盘数据
+        async function loadDashboard() {
+            try {
+                const data = await ApiClient.fetch('/admin/dashboard');
+                document.getElementById('totalUsers').textContent = data.metrics.totalUsers;
+                document.getElementById('activeUsers').textContent = data.metrics.activeUsers;
+                document.getElementById('pendingActivations').textContent = data.metrics.pendingActivations;
+                document.getElementById('totalCommissions').textContent = Utils.formatCurrency(data.metrics.totalCommissions || 0);
+                renderRecentLogs(data.recentLogs || []);
+            } catch (e) {
+                console.error('loadDashboard error:', e);
+            }
+        }
+
+        function renderRecentLogs(logs) {
+            const container = document.getElementById('recentActivities');
+            if (!logs || logs.length === 0) {
+                container.innerHTML = '<div class="text-gray-500 text-center py-8">暂无活动记录</div>';
+                return;
+            }
+
+            container.innerHTML = logs.slice(0, 10).map(log => `
+                <div class="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
+                    <span class="text-gray-700">${Utils.escapeHtml(formatLogMessage(log))}</span>
+                    <span class="text-gray-500 text-sm">${Utils.formatDate(log.createdAt)}</span>
+                </div>
+            `).join('');
+        }
+
+        function formatLogMessage(log) {
+            const map = {
+                approve_activation: '通过充值审核',
+                reject_activation: '拒绝充值审核'
+            };
+            const label = map[log.action] || log.action;
+            return `${label} (${log.targetType}:${log.targetId || '-'})`;
+        }
+
+        // 加载充值审核
+        async function loadActivations() {
+            const tbody = document.getElementById('activationsTableBody');
+
+            try {
+                const data = await ApiClient.fetch('/admin/activations');
+                const activations = data.items || [];
+
+                if (activations.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-center text-gray-500 py-8">暂无待审核记录</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = activations.map(activation => `
+                    <tr>
+                        <td>
+                            <div class="font-medium">${Utils.escapeHtml(activation.username || '未知用户')}</div>
+                            <div class="text-sm text-gray-500">ID: ${activation.userId}</div>
+                        </td>
+                        <td class="font-semibold text-gold">${Utils.formatCurrency(activation.amount)}</td>
+                        <td>
+                            ${activation.voucherUrl ? 
+                                `<button onclick="viewVoucher('${Utils.escapeHtml(activation.voucherUrl)}')" class="btn btn-sm btn-ghost">
+                                    <i class="fas fa-eye mr-1"></i>查看凭证
+                                </button>` : 
+                                '<span class="text-gray-400">无凭证</span>'
+                            }
+                        </td>
+                        <td>${Utils.formatDate(activation.createdAt)}</td>
+                        <td>
+                            <span class="status-badge status-${activation.status}">${Utils.getStatusText(activation.status)}</span>
+                        </td>
+                        <td>
+                            ${activation.status === 'pending' ? `
+                                <div class="flex space-x-2">
+                                    <button onclick="approveActivation(${activation.id})" class="btn btn-sm btn-success">
+                                        <i class="fas fa-check mr-1"></i>通过
+                                    </button>
+                                    <button onclick="rejectActivation(${activation.id})" class="btn btn-sm btn-error">
+                                        <i class="fas fa-times mr-1"></i>拒绝
+                                    </button>
+                                </div>
+                            ` : '-'}
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (e) {
+                console.error('loadActivations error:', e);
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center text-gray-500 py-8">加载失败</td></tr>';
+            }
+        }
+
+        // 加载会员管理
+        async function loadUsers() {
+            const tbody = document.getElementById('usersTableBody');
+
+            try {
+                const data = await ApiClient.fetch('/admin/users');
+                const users = data.items || [];
+                window.__adminUsers = users;
+
+                if (users.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" class="text-center text-gray-500 py-8">暂无会员数据</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = users.map(user => `
+                    <tr>
+                        <td>${user.id}</td>
+                        <td>
+                            <div class="font-medium">${Utils.escapeHtml(user.username)}</div>
+                        </td>
+                        <td>
+                            <span class="status-badge status-${user.activationStatus}">${Utils.getStatusText(user.activationStatus)}</span>
+                        </td>
+                        <td>${user.directCount || 0}/${SYSTEM_CONFIG.DIRECT_REFERRAL_LIMIT}</td>
+                        <td>
+                            <div class="text-sm text-gray-600 max-w-xs truncate" title="${Utils.escapeHtml(user.walletAddress || '')}">
+                                ${user.walletAddress ? Utils.escapeHtml(user.walletAddress.substring(0, 10)) + '...' : '未设置'}
+                            </div>
+                        </td>
+                        <td>${Utils.formatDate(user.createdAt)}</td>
+                        <td>
+                            <div class="flex space-x-2">
+                                <button onclick="viewUser(${user.id})" class="btn btn-sm btn-ghost">
+                                    <i class="fas fa-eye mr-1"></i>查看
+                                </button>
+                                <button onclick="editUser(${user.id})" class="btn btn-sm btn-ghost">
+                                    <i class="fas fa-edit mr-1"></i>编辑
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (e) {
+                console.error('loadUsers error:', e);
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center text-gray-500 py-8">加载失败</td></tr>';
+            }
+        }
+
+        // 加载分润记录
+        async function loadCommissions() {
+            const tbody = document.getElementById('commissionsTableBody');
+
+            try {
+                const data = await ApiClient.fetch('/admin/commissions');
+                const commissions = data.items || [];
+                window.__adminCommissions = commissions;
+
+                if (commissions.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-center text-gray-500 py-8">暂无分润记录</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = commissions.map(commission => `
+                        <tr>
+                            <td>${Utils.escapeHtml(commission.fromUsername || '未知')}</td>
+                            <td>${Utils.escapeHtml(commission.toUsername || '未知')}</td>
+                            <td>${commission.level}级</td>
+                            <td>${(commission.rate * 100).toFixed(0)}%</td>
+                            <td class="font-semibold text-gold">${Utils.formatCurrency(commission.amount)}</td>
+                            <td>${Utils.formatDate(commission.createdAt)}</td>
+                        </tr>
+                    `).join('');
+            } catch (e) {
+                console.error('loadCommissions error:', e);
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center text-gray-500 py-8">加载失败</td></tr>';
+            }
+        }
+
+        // 审核通过
+        async function approveActivation(activationId) {
+            if (!confirm('确定要通过此充值审核吗？')) return;
+
+            try {
+                await ApiClient.fetch(`/admin/activations/${activationId}/approve`, { method: 'POST' });
+                alert('审核通过，用户已激活，分润已生成！');
+                loadActivations();
+                loadDashboard();
+                loadCommissions();
+            } catch (e) {
+                alert(e.message || '操作失败');
+            }
+        }
+
+        // 审核拒绝
+        async function rejectActivation(activationId) {
+            const reason = prompt('请输入拒绝原因：');
+            if (!reason) return;
+
+            try {
+                await ApiClient.fetch(`/admin/activations/${activationId}/reject`, { method: 'POST', body: { note: reason } });
+                alert('审核已拒绝！');
+                loadActivations();
+                loadDashboard();
+            } catch (e) {
+                alert(e.message || '操作失败');
+            }
+        }
+
+        // 搜索用户
+        function searchUsers() {
+            const searchTerm = document.getElementById('userSearch').value.toLowerCase();
+            const userUsers = window.__adminUsers || [];
+            
+            const filteredUsers = userUsers.filter(user => 
+                user.username.toLowerCase().includes(searchTerm)
+            );
+            
+            const tbody = document.getElementById('usersTableBody');
+            
+            if (filteredUsers.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center text-gray-500 py-8">未找到匹配的用户</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = filteredUsers.map(user => `
+                <tr>
+                    <td>${user.id}</td>
+                    <td>
+                        <div class="font-medium">${Utils.escapeHtml(user.username)}</div>
+                    </td>
+                    <td>
+                        <span class="status-badge status-${user.activationStatus}">${Utils.getStatusText(user.activationStatus)}</span>
+                    </td>
+                    <td>${user.directCount || 0}/${SYSTEM_CONFIG.DIRECT_REFERRAL_LIMIT}</td>
+                    <td>
+                        <div class="text-sm text-gray-600 max-w-xs truncate" title="${Utils.escapeHtml(user.walletAddress || '')}">
+                            ${user.walletAddress ? Utils.escapeHtml(user.walletAddress.substring(0, 10)) + '...' : '未设置'}
+                        </div>
+                    </td>
+                    <td>${Utils.formatDate(user.createdAt)}</td>
+                    <td>
+                        <div class="flex space-x-2">
+                            <button onclick="viewUser(${user.id})" class="btn btn-sm btn-ghost">
+                                <i class="fas fa-eye mr-1"></i>查看
+                            </button>
+                            <button onclick="editUser(${user.id})" class="btn btn-sm btn-ghost">
+                                <i class="fas fa-edit mr-1"></i>编辑
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // 筛选分润
+        function filterCommissions() {
+            const level = document.getElementById('commissionLevel').value;
+            const commissions = window.__adminCommissions || [];
+            
+            let filteredCommissions = commissions;
+            if (level) {
+                filteredCommissions = commissions.filter(c => c.level === parseInt(level));
+            }
+            
+            const tbody = document.getElementById('commissionsTableBody');
+            
+            if (filteredCommissions.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center text-gray-500 py-8">暂无符合条件的分润记录</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = filteredCommissions.map(commission => `
+                <tr>
+                    <td>${Utils.escapeHtml(commission.fromUsername || '未知')}</td>
+                    <td>${Utils.escapeHtml(commission.toUsername || '未知')}</td>
+                    <td>${commission.level}级</td>
+                    <td>${(commission.rate * 100).toFixed(0)}%</td>
+                    <td class="font-semibold text-gold">${Utils.formatCurrency(commission.amount)}</td>
+                    <td>${Utils.formatDate(commission.createdAt)}</td>
+                </tr>
+            `).join('');
+        }
+
+        // 查看用户详情
+        function viewUser(userId) {
+            const user = (window.__adminUsers || []).find(u => u.id === userId);
+            
+            if (!user) return;
+            
+            alert(`用户详情：
+用户名：${user.username}
+激活状态：${Utils.getStatusText(user.activationStatus)}
+直推人数：${user.directCount || 0}/${SYSTEM_CONFIG.DIRECT_REFERRAL_LIMIT}
+钱包地址：${user.walletAddress || '未设置'}
+注册时间：${Utils.formatDate(user.createdAt)}`);
+        }
+
+        // 编辑用户
+        async function editUser(userId) {
+            const user = (window.__adminUsers || []).find(u => u.id === userId);
+            
+            if (!user) return;
+            
+            const newStatus = prompt(`修改用户状态 (当前: ${Utils.getStatusText(user.activationStatus)})
+可选状态：pending, active, inactive`, user.activationStatus);
+            
+            if (newStatus && ['pending', 'active', 'inactive'].includes(newStatus)) {
+                try {
+                    await ApiClient.fetch(`/admin/users/${userId}`, { method: 'PATCH', body: { activationStatus: newStatus } });
+                    alert('用户状态已更新！');
+                    loadUsers();
+                    loadDashboard();
+                } catch (e) {
+                    alert(e.message || '操作失败');
+                }
+            }
+        }
+
+        // 查看凭证
+        function viewVoucher(voucherPath) {
+            window.open(voucherPath, '_blank');
+        }
+
+        // 退出登录
+        async function logout() {
+            try {
+                await ApiClient.fetch('/auth/logout', { method: 'POST' });
+            } catch (e) {}
+
+            ApiClient.clearToken();
+            window.location.href = 'index.html';
+        }
+    </script>
+  </body>
+
+</html>

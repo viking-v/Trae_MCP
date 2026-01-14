@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>创业投资</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- 核心模块 -->
+    <script src="js/config.js"></script>
+    <script src="js/core.js"></script>
+    <style>
+        :root {
+            --primary: 220 38% 16%;
+            --primary-foreground: 220 38% 98%;
+            --secondary: 210 40% 96%;
+            --accent: 48 96% 53%;
+            --muted: 210 40% 96%;
+            --background: 0 0% 100%;
+            --foreground: 220 38% 16%;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(220 38% 25%) 100%);
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .hover-lift {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .hover-lift:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .table-row-hover:hover {
+            background-color: hsl(var(--muted) / 0.5);
+        }
+        
+        .animate-fade-in {
+            animation: fadeIn 0.6s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <!-- Header -->
+    <header class="gradient-bg text-white shadow-lg">
+        <div class="container mx-auto px-6 py-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <i class="fas fa-chart-line text-3xl text-yellow-400"></i>
+                    <div>
+                        <h1 class="text-3xl font-bold">梦之缘七级分润对账系统</h1>
+                        <p class="text-blue-100 mt-1">专业级分润计算与资金管理平台</p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <div class="text-2xl font-bold text-yellow-400">$370,000</div>
+                    <div class="text-sm text-blue-100">基准分润金额</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container mx-auto px-6 py-8">
+        <!-- 控制面板 -->
+        <div class="glass-effect rounded-xl p-6 mb-8 hover-lift animate-fade-in">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                <i class="fas fa-cogs text-blue-600 mr-3"></i>
+                分润参数设置
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">基准金额 ($)</label>
+                    <input type="number" id="baseAmount" value="370000" 
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">计算月份</label>
+                    <input type="month" id="calcMonth" value="2026-01" 
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                </div>
+                <div class="flex items-end">
+                    <button onclick="calculateDividends()" 
+                            class="w-full bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                        <i class="fas fa-calculator mr-2"></i>
+                        计算分润
+                    </button>
+                </div>
+                <div class="flex items-end">
+                    <button onclick="batchCalculate()" 
+                            class="w-full bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors font-medium">
+                        <i class="fas fa-layer-group mr-2"></i>
+                        批量计算
+                    </button>
+                </div>
+                <div class="flex items-end">
+                    <button onclick="toggleAutoCalc()" 
+                            class="w-full bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors font-medium">
+                        <i class="fas fa-sync-alt mr-2"></i>
+                        <span id="autoCalcStatus">自动计算: 开启</span>
+                    </button>
+                </div>
+                <div class="flex items-end">
+                    <button onclick="toggleAutoExport()" 
+                            class="w-full bg-orange-600 text-white px-6 py-3 rounded-lg hover:bg-orange-700 transition-colors font-medium">
+                        <i class="fas fa-file-export mr-2"></i>
+                        <span id="autoExportStatus">自动导出: 关闭</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 七级分润明细表 -->
+        <div class="glass-effect rounded-xl p-6 mb-8 hover-lift animate-fade-in">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                <i class="fas fa-layer-group text-green-600 mr-3"></i>
+                七级分润明细表
+            </h2>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full border-collapse">
+                    <thead>
+                        <tr class="bg-gray-100">
+                            <th class="border border-gray-300 px-4 py-3 text-left font-semibold text-gray-700">上级层级</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left font-semibold text-gray-700">费率</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left font-semibold text-gray-700">计算公式</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left font-semibold text-gray-700">分润金额 ($)</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left font-semibold text-gray-700">占比</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dividendTable">
+                        <!-- 动态生成 -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 资金池分配 -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- 资金池分配表 -->
+            <div class="glass-effect rounded-xl p-6 hover-lift animate-fade-in">
+                <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-piggy-bank text-purple-600 mr-3"></i>
+                    资金池分配
+                </h2>
+                
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
+                        <span class="font-medium text-gray-700">总分润金额</span>
+                        <span class="font-bold text-blue-600" id="totalDividend">$122,100</span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 bg-green-50 rounded-lg">
+                        <span class="font-medium text-gray-700">剩余资金池</span>
+                        <span class="font-bold text-green-600" id="remainingPool">$247,900</span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 bg-yellow-50 rounded-lg">
+                        <span class="font-medium text-gray-700">创业资金池 (30%)</span>
+                        <span class="font-bold text-yellow-600" id="entrepreneurPool">$111,000</span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 bg-red-50 rounded-lg">
+                        <span class="font-medium text-gray-700">慈善基金池 (3%)</span>
+                        <span class="font-bold text-red-600" id="charityPool">$11,100</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 月度汇总 -->
+            <div class="glass-effect rounded-xl p-6 hover-lift animate-fade-in">
+                <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-calendar-alt text-indigo-600 mr-3"></i>
+                    月度资金汇总
+                </h2>
+                
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                        <span class="font-medium text-gray-700">计算月份</span>
+                        <span class="font-bold text-gray-600" id="summaryMonth">2026-01</span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 bg-indigo-50 rounded-lg">
+                        <span class="font-medium text-gray-700">总入金</span>
+                        <span class="font-bold text-indigo-600" id="totalIncome">$370,000</span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 bg-teal-50 rounded-lg">
+                        <span class="font-medium text-gray-700">平台留存 (10%)</span>
+                        <span class="font-bold text-teal-600" id="platformRetention">$37,000</span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 bg-orange-50 rounded-lg">
+                        <span class="font-medium text-gray-700">实际发放率</span>
+                        <span class="font-bold text-orange-600" id="distributionRate">33%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 计算历史记录 -->
+        <div class="glass-effect rounded-xl p-6 mb-8 hover-lift animate-fade-in">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                <i class="fas fa-history text-cyan-600 mr-3"></i>
+                计算历史记录
+            </h2>
+            
+            <div id="calculationHistory" class="space-y-4">
+                <div class="text-gray-500 text-center py-8">
+                    <i class="fas fa-clock text-4xl mb-4"></i>
+                    <p>暂无计算历史记录</p>
+                </div>
+            </div>
+            
+            <div class="mt-6 flex space-x-4">
+                <button onclick="clearCalculationHistory()" 
+                        class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors">
+                    <i class="fas fa-trash mr-2"></i>
+                    清空历史
+                </button>
+                <button onclick="exportHistoryCSV()" 
+                        class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors">
+                    <i class="fas fa-download mr-2"></i>
+                    导出历史
+                </button>
+            </div>
+        </div>
+
+        <!-- CSV导出区域 -->
+        <div class="glass-effect rounded-xl p-6 hover-lift animate-fade-in">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                <i class="fas fa-file-csv text-emerald-600 mr-3"></i>
+                CSV导出功能
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <button onclick="exportDividendCSV()" 
+                        class="bg-emerald-600 text-white px-6 py-3 rounded-lg hover:bg-emerald-700 transition-colors font-medium">
+                    <i class="fas fa-download mr-2"></i>
+                    导出七级分润表
+                </button>
+                <button onclick="exportPoolCSV()" 
+                        class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                    <i class="fas fa-download mr-2"></i>
+                    导出资金池表
+                </button>
+                <button onclick="exportSummaryCSV()" 
+                        class="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors font-medium">
+                    <i class="fas fa-download mr-2"></i>
+                    导出月度汇总表
+                </button>
+            </div>
+            
+            <div class="bg-gray-100 p-4 rounded-lg">
+                <h3 class="font-semibold text-gray-700 mb-2">CSV预览</h3>
+                <textarea id="csvPreview" rows="8" readonly 
+                          class="w-full px-3 py-2 border border-gray-300 rounded bg-white font-mono text-sm"></textarea>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 七级分润配置 - 使用核心配置
+        const dividendRates = [
+            { level: 1, rate: SYSTEM_CONFIG.PROFIT_RATES[0], name: "直推人" },
+            { level: 2, rate: SYSTEM_CONFIG.PROFIT_RATES[1], name: "上级2" },
+            { level: 3, rate: SYSTEM_CONFIG.PROFIT_RATES[2], name: "上级3" },
+            { level: 4, rate: SYSTEM_CONFIG.PROFIT_RATES[3], name: "上级4" },
+            { level: 5, rate: SYSTEM_CONFIG.PROFIT_RATES[4], name: "上级5" },
+            { level: 6, rate: SYSTEM_CONFIG.PROFIT_RATES[5], name: "上级6" },
+            { level: 7, rate: SYSTEM_CONFIG.PROFIT_RATES[6], name: "上级7" }
+        ];
+
+        function calculateDividends() {
+            const baseAmount = parseFloat(document.getElementById('baseAmount').value) || 370000;
+            const month = document.getElementById('calcMonth').value;
+            
+            // 计算七级分润
+            let totalDividend = 0;
+            const tableBody = document.getElementById('dividendTable');
+            tableBody.innerHTML = '';
+            
+            dividendRates.forEach(item => {
+                const amount = baseAmount * item.rate;
+                totalDividend += amount;
+                const percentage = (item.rate * 100).toFixed(1);
+                
+                const row = document.createElement('tr');
+                row.className = 'table-row-hover';
+                row.innerHTML = `
+                    <td class="border border-gray-300 px-4 py-3 font-medium">上级${item.level} ${item.name}</td>
+                    <td class="border border-gray-300 px-4 py-3">${percentage}%</td>
+                    <td class="border border-gray-300 px-4 py-3 font-mono text-sm">$${baseAmount.toLocaleString()} × ${percentage}%</td>
+                    <td class="border border-gray-300 px-4 py-3 font-bold text-green-600">$${amount.toLocaleString()}</td>
+                    <td class="border border-gray-300 px-4 py-3">${((amount/totalDividend)*100).toFixed(1)}%</td>
+                `;
+                tableBody.appendChild(row);
+            });
+            
+            // 更新汇总信息
+            const remainingPool = baseAmount - totalDividend;
+            const entrepreneurPool = baseAmount * 0.30;
+            const charityPool = baseAmount * 0.03;
+            const platformRetention = baseAmount * 0.10;
+            
+            document.getElementById('totalDividend').textContent = `$${totalDividend.toLocaleString()}`;
+            document.getElementById('remainingPool').textContent = `$${remainingPool.toLocaleString()}`;
+            document.getElementById('entrepreneurPool').textContent = `$${entrepreneurPool.toLocaleString()}`;
+            document.getElementById('charityPool').textContent = `$${charityPool.toLocaleString()}`;
+            document.getElementById('platformRetention').textContent = `$${platformRetention.toLocaleString()}`;
+            document.getElementById('totalIncome').textContent = `$${baseAmount.toLocaleString()}`;
+            document.getElementById('summaryMonth').textContent = month;
+            document.getElementById('distributionRate').textContent = `${((totalDividend/baseAmount)*100).toFixed(1)}%`;
+            
+            // 更新CSV预览
+            updateCSVPreview();
+        }
+
+        function updateCSVPreview() {
+            const baseAmount = parseFloat(document.getElementById('baseAmount').value) || 370000;
+            const month = document.getElementById('calcMonth').value;
+            
+            let csv = `七级分润明细表\n`;
+            csv += `上级层级,费率,分润金额($),计算公式\n`;
+            
+            dividendRates.forEach(item => {
+                const amount = baseAmount * item.rate;
+                csv += `上级${item.level} ${item.name},${(item.rate * 100).toFixed(1)}%,${amount.toFixed(2)},$${baseAmount.toLocaleString()} × ${(item.rate * 100).toFixed(1)}%\n`;
+            });
+            
+            csv += `\n资金池分配\n`;
+            csv += `项目,金额($),比例\n`;
+            csv += `总分润,${(baseAmount * 0.33).toFixed(2)},33%\n`;
+            csv += `创业资金池,${(baseAmount * 0.30).toFixed(2)},30%\n`;
+            csv += `慈善基金池,${(baseAmount * 0.03).toFixed(2)},3%\n`;
+            csv += `平台留存,${(baseAmount * 0.10).toFixed(2)},10%\n`;
+            csv += `剩余资金,${(baseAmount * 0.24).toFixed(2)},24%\n`;
+            
+            document.getElementById('csvPreview').value = csv;
+        }
+
+        function exportDividendCSV() {
+            const baseAmount = parseFloat(document.getElementById('baseAmount').value) || 370000;
+            const month = document.getElementById('calcMonth').value;
+            
+            let csv = `月份,${month}\n`;
+            csv += `基准金额,$${baseAmount.toLocaleString()}\n\n`;
+            csv += `七级分润明细表\n`;
+            csv += `上级层级,费率,分润金额($),占比(%)\n`;
+            
+            let totalDividend = 0;
+            dividendRates.forEach(item => {
+                const amount = baseAmount * item.rate;
+                totalDividend += amount;
+                csv += `上级${item.level} ${item.name},${(item.rate * 100).toFixed(1)}%,${amount.toFixed(2)},${((amount/baseAmount)*100).toFixed(2)}%\n`;
+            });
+            
+            downloadCSV(csv, `七级分润明细表_${month}.csv`);
+        }
+
+        function exportPoolCSV() {
+            const baseAmount = parseFloat(document.getElementById('baseAmount').value) || 370000;
+            const month = document.getElementById('calcMonth').value;
+            
+            let csv = `月份,${month}\n`;
+            csv += `基准金额,$${baseAmount.toLocaleString()}\n\n`;
+            csv += `资金池分配表\n`;
+            csv += `项目,金额($),比例(%),说明\n`;
+            csv += `总分润,${(baseAmount * 0.33).toFixed(2)},33%,七级分润总额\n`;
+            csv += `创业资金池,${(baseAmount * 0.30).toFixed(2)},30%,用于创业项目投资\n`;
+            csv += `慈善基金池,${(baseAmount * 0.03).toFixed(2)},3%,慈善公益事业\n`;
+            csv += `平台留存,${(baseAmount * 0.10).toFixed(2)},10%,平台运营费用\n`;
+            csv += `剩余资金,${(baseAmount * 0.24).toFixed(2)},24%,预留资金池\n`;
+            csv += `合计,${baseAmount.toFixed(2)},100%,总计\n`;
+            
+            downloadCSV(csv, `资金池分配表_${month}.csv`);
+        }
+
+        function exportSummaryCSV() {
+            const baseAmount = parseFloat(document.getElementById('baseAmount').value) || 370000;
+            const month = document.getElementById('calcMonth').value;
+            
+            let csv = `梦之缘七级分润月度汇总表\n`;
+            csv += `计算月份,${month}\n`;
+            csv += `生成时间,${new Date().toLocaleString()}\n\n`;
+            csv += `项目,金额($),比例(%),备注\n`;
+            csv += `总入金,${baseAmount.toFixed(2)},100%,月度总收入\n`;
+            csv += `七级分润总额,${(baseAmount * 0.33).toFixed(2)},33%,上级分润合计\n`;
+            csv += `创业资金池,${(baseAmount * 0.30).toFixed(2)},30%,项目投资资金\n`;
+            csv += `慈善基金池,${(baseAmount * 0.03).toFixed(2)},3%,公益资金\n`;
+            csv += `平台留存,${(baseAmount * 0.10).toFixed(2)},10%,运营成本\n`;
+            csv += `剩余资金,${(baseAmount * 0.24).toFixed(2)},24%,资金储备\n`;
+            
+            downloadCSV(csv, `月度汇总表_${month}.csv`);
+        }
+
+        function downloadCSV(csv, filename) {
+            const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', filename);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // 自动计算功能配置
+        const autoCalcConfig = {
+            enabled: true,
+            interval: 30000, // 30秒自动计算一次
+            saveHistory: true,
+            maxHistory: 50,
+            autoExport: false
+        };
+
+        // 计算历史记录
+        let calculationHistory = [];
+
+        // 页面加载时自动计算
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCalculationHistory();
+            calculateDividends();
+            setupAutoCalculation();
+        });
+
+        // 设置自动计算
+        function setupAutoCalculation() {
+            if (autoCalcConfig.enabled) {
+                setInterval(() => {
+                    if (autoCalcConfig.enabled) {
+                        calculateDividends();
+                        console.log('自动计算执行:', new Date().toLocaleString());
+                    }
+                }, autoCalcConfig.interval);
+                
+                // 监听输入变化，实时计算
+                document.getElementById('baseAmount').addEventListener('input', debounce(calculateDividends, 1000));
+                document.getElementById('calcMonth').addEventListener('change', calculateDividends);
+            }
+        }
+
+        // 防抖函数 - 使用核心模块
+        function debounce(func, wait) {
+            return Utils.debounce(func, wait);
+        }
+
+        // 保存计算历史
+        function saveCalculationHistory(data) {
+            if (!autoCalcConfig.saveHistory) return;
+            
+            const historyItem = {
+                timestamp: new Date().toISOString(),
+                baseAmount: data.baseAmount,
+                month: data.month,
+                totalDividend: data.totalDividend,
+                entrepreneurPool: data.entrepreneurPool,
+                charityPool: data.charityPool,
+                platformRetention: data.platformRetention,
+                remainingPool: data.remainingPool,
+                dividendDetails: data.dividendDetails
+            };
+            
+            calculationHistory.unshift(historyItem);
+            
+            // 限制历史记录数量
+            if (calculationHistory.length > autoCalcConfig.maxHistory) {
+                calculationHistory = calculationHistory.slice(0, autoCalcConfig.maxHistory);
+            }
+            
+            // 保存到localStorage
+            localStorage.setItem('dividendCalculationHistory', JSON.stringify(calculationHistory));
+        }
+
+        // 加载计算历史
+        function loadCalculationHistory() {
+            const saved = localStorage.getItem('dividendCalculationHistory');
+            if (saved) {
+                calculationHistory = JSON.parse(saved);
+                displayCalculationHistory();
+            }
+        }
+
+        // 显示计算历史
+        function displayCalculationHistory() {
+            const historyContainer = document.getElementById('calculationHistory');
+            if (!historyContainer || calculationHistory.length === 0) return;
+            
+            let html = '<h3 class="text-lg font-semibold mb-4">最近计算历史</h3>';
+            html += '<div class="space-y-3 max-h-64 overflow-y-auto">';
+            
+            calculationHistory.slice(0, 10).forEach((item, index) => {
+                const date = new Date(item.timestamp);
+                html += `
+                    <div class="bg-gray-50 p-3 rounded-lg border hover:bg-gray-100 transition-colors cursor-pointer" 
+                         onclick="loadHistoryCalculation(${index})">
+                        <div class="flex justify-between items-center">
+                            <span class="font-medium">${item.month}</span>
+                            <span class="text-sm text-gray-500">${date.toLocaleString()}</span>
+                        </div>
+                        <div class="text-sm text-gray-600 mt-1">
+                            基准: $${item.baseAmount.toLocaleString()} | 
+                            分润: $${item.totalDividend.toLocaleString()}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            historyContainer.innerHTML = html;
+        }
+
+        // 加载历史计算数据
+        function loadHistoryCalculation(index) {
+            const item = calculationHistory[index];
+            if (!item) return;
+            
+            document.getElementById('baseAmount').value = item.baseAmount;
+            document.getElementById('calcMonth').value = item.month;
+            calculateDividends();
+            
+            // 滚动到计算区域
+            document.querySelector('.glass-effect').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // 批量计算功能
+        function batchCalculate() {
+            const batchData = [
+                { amount: 100000, month: '2026-01' },
+                { amount: 200000, month: '2026-02' },
+                { amount: 300000, month: '2026-03' },
+                { amount: 500000, month: '2026-04' },
+                { amount: 750000, month: '2026-05' }
+            ];
+            
+            let batchResults = [];
+            
+            batchData.forEach((data, index) => {
+                setTimeout(() => {
+                    document.getElementById('baseAmount').value = data.amount;
+                    document.getElementById('calcMonth').value = data.month;
+                    calculateDividends();
+                    
+                    // 保存批量计算结果
+                    const currentData = getCurrentCalculationData();
+                    batchResults.push(currentData);
+                    
+                    // 如果是最后一个，导出批量结果
+                    if (index === batchData.length - 1) {
+                        exportBatchResults(batchResults);
+                    }
+                }, index * 2000); // 每2秒计算一个
+            });
+        }
+
+        // 获取当前计算数据
+        function getCurrentCalculationData() {
+            return {
+                baseAmount: parseFloat(document.getElementById('baseAmount').value) || 370000,
+                month: document.getElementById('calcMonth').value,
+                totalDividend: parseFloat(document.getElementById('totalDividend').textContent.replace(/[$,]/g, '')),
+                entrepreneurPool: parseFloat(document.getElementById('entrepreneurPool').textContent.replace(/[$,]/g, '')),
+                charityPool: parseFloat(document.getElementById('charityPool').textContent.replace(/[$,]/g, '')),
+                platformRetention: parseFloat(document.getElementById('platformRetention').textContent.replace(/[$,]/g, '')),
+                remainingPool: parseFloat(document.getElementById('remainingPool').textContent.replace(/[$,]/g, '')),
+                dividendDetails: getDividendDetails()
+            };
+        }
+
+        // 获取分润明细
+        function getDividendDetails() {
+            const details = [];
+            const baseAmount = parseFloat(document.getElementById('baseAmount').value) || 370000;
+            
+            dividendRates.forEach(item => {
+                details.push({
+                    level: item.level,
+                    name: item.name,
+                    rate: item.rate,
+                    amount: baseAmount * item.rate
+                });
+            });
+            
+            return details;
+        }
+
+        // 导出批量计算结果
+        function exportBatchResults(results) {
+            let csv = '批量七级分润计算结果\n';
+            csv += '生成时间,'+ new Date().toLocaleString() +'\n\n';
+            csv += '月份,基准金额($),总分润($),创业池($),慈善池($),平台留存($),剩余池($)';
+            
+            // 添加各级分润列
+            dividendRates.forEach(item => {
+                csv += `,上级${item.level}($)`;
+            });
+            csv += '\n';
+            
+            results.forEach(result => {
+                csv += `${result.month},${result.baseAmount},${result.totalDividend},${result.entrepreneurPool},${result.charityPool},${result.platformRetention},${result.remainingPool}`;
+                
+                result.dividendDetails.forEach(detail => {
+                    csv += `,${detail.amount}`;
+                });
+                csv += '\n';
+            });
+            
+            downloadCSV(csv, `批量七级分润计算结果_${new Date().toISOString().split('T')[0]}.csv`);
+        }
+
+        // 增强的calculateDividends函数
+        const originalCalculateDividends = calculateDividends;
+        calculateDividends = function() {
+            originalCalculateDividends();
+            
+            // 获取当前计算数据
+            const currentData = getCurrentCalculationData();
+            
+            // 保存到历史记录
+            saveCalculationHistory(currentData);
+            
+            // 更新历史显示
+            displayCalculationHistory();
+            
+            // 自动导出（如果启用）
+            if (autoCalcConfig.autoExport) {
+                setTimeout(() => {
+                    exportDividendCSV();
+                }, 1000);
+            }
+        }
+        
+        // 切换自动计算
+        function toggleAutoCalc() {
+            autoCalcConfig.enabled = !autoCalcConfig.enabled;
+            document.getElementById('autoCalcStatus').textContent = `自动计算: ${autoCalcConfig.enabled ? '开启' : '关闭'}`;
+        }
+        
+        // 切换自动导出
+        function toggleAutoExport() {
+            autoCalcConfig.autoExport = !autoCalcConfig.autoExport;
+            document.getElementById('autoExportStatus').textContent = `自动导出: ${autoCalcConfig.autoExport ? '开启' : '关闭'}`;
+        }
+        
+        // 清空计算历史
+        function clearCalculationHistory() {
+            if (confirm('确定要清空所有计算历史记录吗？')) {
+                calculationHistory = [];
+                localStorage.removeItem('dividendCalculationHistory');
+                displayCalculationHistory();
+            }
+        }
+        
+        // 导出历史记录CSV
+        function exportHistoryCSV() {
+            if (calculationHistory.length === 0) {
+                alert('暂无历史记录可导出');
+                return;
+            }
+            
+            let csv = '计算历史记录\n';
+            csv += '时间,月份,基准金额($),总分润($),创业池($),慈善池($),平台留存($),剩余($)\n';
+            
+            calculationHistory.forEach(item => {
+                const date = new Date(item.timestamp).toLocaleString();
+                csv += `${date},${item.month},${item.baseAmount},${item.totalDividend},${item.entrepreneurPool},${item.charityPool},${item.platformRetention},${item.remainingPool}\n`;
+            });
+            
+            downloadCSV(csv, `计算历史记录_${new Date().toISOString().split('T')[0]}.csv`);
+        }
+    </script>
+</body>
+</html>

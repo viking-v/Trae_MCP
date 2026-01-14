@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Plato - js\core.js</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+
+  <link href="../../assets/css/vendor/morris.css" rel="stylesheet">
+  <link href="../../assets/css/vendor/bootstrap.css" rel="stylesheet">
+  <link href="../../assets/css/vendor/font-awesome.css" rel="stylesheet">
+  <link href="../../assets/css/vendor/codemirror.css" rel="stylesheet">
+  <link href="../../assets/css/plato.css" rel="stylesheet">
+  <link href="../../assets/css/plato-file.css" rel="stylesheet">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-fixed-top">
+  <div class="container">
+    <a class="navbar-brand" href="http://github.com/es-analysis/plato">Plato on Github</a>
+    <ul class="nav navbar-nav">
+      <li>
+        <a href="../../index.html">Report Home</a>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<div class="jumbotron">
+  <div class="container">
+    <h1>js\core.js</h1>
+  </div>
+</div>
+
+<div class="container aggregate-stats">
+  <div class="row">
+    <div class="col-md-6">
+      <h2 class="header">Maintainability <a href="http://blogs.msdn.com/b/codeanalysis/archive/2007/11/20/maintainability-index-range-and-meaning.aspx"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="A value between 0 and 100 that represents the relative ease of maintaining the code. A high value means better maintainability." data-original-title="Maintainability Index"  data-container="body"></i></a></h2>
+      <p class="stat">67.50</p>
+    </div>
+    <div class="col-md-6">
+      <h2 class="header">Lines of code <i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Source Lines of Code / Logical Lines of Code" data-original-title="SLOC/LSLOC" data-container="body"></i></h2>
+      <p class="stat">654</p>
+    </div>
+  </div>
+  <div class="row historical">
+    <div class="col-md-6">
+      <p id="chart_historical_maint" class="chart"></p>
+    </div>
+    <div class="col-md-6">
+      <p id="chart_historical_sloc" class="chart"></p>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-6">
+      <h2 class="header">Difficulty  <a href="http://en.wikipedia.org/wiki/Halstead_complexity_measures"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="The difficulty measure is related to the difficulty of the program to write or understand." data-original-title="Difficulty" data-container="body"></i></a></h2>
+      <p class="stat">84.59</p>
+    </div>
+    <div class="col-md-6">
+      <h2 class="header">Estimated Errors  <a href="http://en.wikipedia.org/wiki/Halstead_complexity_measures"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Halstead's delivered bugs is an estimate for the number of errors in the implementation." data-original-title="Delivered Bugs" data-container="body"></i></a></h2>
+      <p class="stat">7.09</p>
+    </div>
+  </div>
+</div>
+
+<div class="container charts">
+  <div class="row">
+    <h2 class="header">Function weight</h2>
+  </div>
+  <div class="row">
+    <div class="col-md-6">
+      <h3 class="chart-header">By Complexity <a href="http://en.wikipedia.org/wiki/Cyclomatic_complexity"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="This metric counts the number of distinct paths through a block of code. Lower values are better." data-original-title="Cyclomatic Complexity" data-container="body"></i></a></h3>
+      <div id="fn-by-complexity" class="stat"></div>
+    </div>
+    <div class="col-md-6">
+      <h3 class="chart-header">By SLOC  <i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Source Lines of Code / Logical Lines of Code" data-original-title="SLOC/LSLOC" data-container="body"></i></h3>
+      <div id="fn-by-sloc" class="stat"></div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="row">
+    <textarea id="file-source" class="col-md-12">/**
+ * 梦之缘创业投资平台 - 核心模块
+ * @version 3.0
+ * @description 包含用户管理、缓存、安全验证、分润计算等核心功能
+ */
+
+(function(global) {
+    &#039;use strict&#039;;
+
+    // ==================== 工具函数 ====================
+    const Utils = {
+        // 生成唯一ID
+        generateId: () =&gt; Date.now() + Math.floor(Math.random() * 10000),
+        
+        // 生成邀请码
+        generateInviteCode: () =&gt; {
+            const chars = &#039;ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789&#039;;
+            let code = &#039;INV&#039;;
+            for (let i = 0; i &lt; 8; i++) {
+                code += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return code;
+        },
+        
+        // 生成多个邀请码
+        generateInviteCodes: (count = 5) =&gt; {
+            const codes = new Set();
+            while (codes.size &lt; count) {
+                codes.add(Utils.generateInviteCode());
+            }
+            return Array.from(codes);
+        },
+        
+        // 格式化货币
+        formatCurrency: (amount) =&gt; {
+            return `${SYSTEM_CONFIG.CURRENCY_SYMBOL}${parseFloat(amount).toFixed(2)}`;
+        },
+        
+        // 格式化日期
+        formatDate: (date) =&gt; {
+            const d = new Date(date);
+            return d.toLocaleString(&#039;zh-CN&#039;);
+        },
+        
+        // 获取状态文本
+        getStatusText: (status) =&gt; {
+            const map = {
+                &#039;pending&#039;: &#039;待审核&#039;,
+                &#039;approved&#039;: &#039;已通过&#039;,
+                &#039;rejected&#039;: &#039;已拒绝&#039;,
+                &#039;active&#039;: &#039;已激活&#039;,
+                &#039;inactive&#039;: &#039;未激活&#039;
+            };
+            return map[status] || status;
+        },
+        
+        // HTML转义防XSS
+        escapeHtml: (text) =&gt; {
+            if (!text) return &#039;&#039;;
+            const map = {
+                &#039;&amp;&#039;: &#039;&amp;amp;&#039;,
+                &#039;&lt;&#039;: &#039;&amp;lt;&#039;,
+                &#039;&gt;&#039;: &#039;&amp;gt;&#039;,
+                &#039;&quot;&#039;: &#039;&amp;quot;&#039;,
+                &quot;&#039;&quot;: &#039;&amp;#39;&#039;
+            };
+            return String(text).replace(/[&amp;&lt;&gt;&quot;&#039;]/g, m =&gt; map[m]);
+        },
+        
+        // 深拷贝
+        deepClone: (obj) =&gt; {
+            if (obj === null || typeof obj !== &#039;object&#039;) return obj;
+            if (obj instanceof Date) return new Date(obj.getTime());
+            if (Array.isArray(obj)) return obj.map(item =&gt; Utils.deepClone(item));
+            const cloned = {};
+            for (let key in obj) {
+                if (obj.hasOwnProperty(key)) {
+                    cloned[key] = Utils.deepClone(obj[key]);
+                }
+            }
+            return cloned;
+        },
+        
+        // 防抖
+        debounce: (func, wait) =&gt; {
+            let timeout;
+            return function(...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() =&gt; func.apply(this, args), wait);
+            };
+        },
+        
+        // 节流
+        throttle: (func, limit) =&gt; {
+            let inThrottle;
+            return function(...args) {
+                if (!inThrottle) {
+                    func.apply(this, args);
+                    inThrottle = true;
+                    setTimeout(() =&gt; inThrottle = false, limit);
+                }
+            };
+        }
+    };
+
+    // ==================== 数据管理器 ====================
+    const DataManager = {
+        getData: (key, defaultValue = []) =&gt; {
+            try {
+                const data = localStorage.getItem(key);
+                return data ? JSON.parse(data) : Utils.deepClone(defaultValue);
+            } catch (e) {
+                console.error(&#039;DataManager.getData error:&#039;, e);
+                return Utils.deepClone(defaultValue);
+            }
+        },
+        
+        setData: (key, data) =&gt; {
+            try {
+                localStorage.setItem(key, JSON.stringify(data));
+                return true;
+            } catch (e) {
+                console.error(&#039;DataManager.setData error:&#039;, e);
+                return false;
+            }
+        },
+        
+        removeData: (key) =&gt; {
+            try {
+                localStorage.removeItem(key);
+                return true;
+            } catch (e) {
+                return false;
+            }
+        }
+    };
+
+    // ==================== 缓存管理器 ====================
+    const CacheManager = {
+        caches: new Map(),
+        
+        set: (key, data, ttl = 300000) =&gt; {
+            CacheManager.caches.set(key, {
+                data,
+                expiry: Date.now() + ttl
+            });
+        },
+        
+        get: (key) =&gt; {
+            const cached = CacheManager.caches.get(key);
+            if (!cached) return null;
+            if (Date.now() &gt; cached.expiry) {
+                CacheManager.caches.delete(key);
+                return null;
+            }
+            return cached.data;
+        },
+        
+        clear: (key) =&gt; {
+            if (key) {
+                CacheManager.caches.delete(key);
+            } else {
+                CacheManager.caches.clear();
+            }
+        },
+        
+        invalidatePattern: (pattern) =&gt; {
+            for (const key of CacheManager.caches.keys()) {
+                if (key.includes(pattern)) {
+                    CacheManager.caches.delete(key);
+                }
+            }
+        }
+    };
+
+    // ==================== 用户管理器 ====================
+    const UserManager = {
+        userIndex: new Map(),
+        usernameIndex: new Map(),
+        inviteCodeIndex: new Map(),
+        
+        // 初始化索引
+        initIndex: () =&gt; {
+            const users = DataManager.getData(SYSTEM_CONFIG.STORAGE_KEYS.USERS);
+            UserManager.userIndex.clear();
+            UserManager.usernameIndex.clear();
+            UserManager.inviteCodeIndex.clear();
+            
+            users.forEach(user =&gt; {
+                UserManager.userIndex.set(user.id, user);
+                UserManager.usernameIndex.set(user.username, user);
+                if (user.inviteCodes) {
+                    user.inviteCodes.forEach(code =&gt; {
+                        UserManager.inviteCodeIndex.set(code, user);
+                    });
+                }
+            });
+        },
+        
+        // 获取所有用户
+        getAllUsers: () =&gt; {
+            return DataManager.getData(SYSTEM_CONFIG.STORAGE_KEYS.USERS);
+        },
+        
+        // 通过ID获取用户
+        getUser: (userId) =&gt; {
+            if (UserManager.userIndex.size === 0) {
+                UserManager.initIndex();
+            }
+            return UserManager.userIndex.get(userId) || null;
+        },
+        
+        // 通过用户名获取用户
+        getUserByUsername: (username) =&gt; {
+            if (UserManager.usernameIndex.size === 0) {
+                UserManager.initIndex();
+            }
+            return UserManager.usernameIndex.get(username) || null;
+        },
+        
+        // 通过邀请码获取用户
+        getUserByInviteCode: (code) =&gt; {
+            if (UserManager.inviteCodeIndex.size === 0) {
+                UserManager.initIndex();
+            }
+            return UserManager.inviteCodeIndex.get(code) || null;
+        },
+        
+        // 添加用户
+        addUser: (userData) =&gt; {
+            const users = UserManager.getAllUsers();
+            const newUser = {
+                id: Utils.generateId(),
+                username: userData.username,
+                password: userData.password,
+                role: userData.role || &#039;user&#039;,
+                activationStatus: userData.activationStatus || &#039;pending&#039;,
+                walletAddress: userData.walletAddress || &#039;&#039;,
+                inviteCodes: Utils.generateInviteCodes(),
+                referredUsers: [],
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            };
+            
+            users.push(newUser);
+            DataManager.setData(SYSTEM_CONFIG.STORAGE_KEYS.USERS, users);
+            
+            // 更新索引
+            UserManager.userIndex.set(newUser.id, newUser);
+            UserManager.usernameIndex.set(newUser.username, newUser);
+            newUser.inviteCodes.forEach(code =&gt; {
+                UserManager.inviteCodeIndex.set(code, newUser);
+            });
+            
+            CacheManager.invalidatePattern(&#039;team_&#039;);
+            return newUser;
+        },
+        
+        // 更新用户
+        updateUser: (userId, updates) =&gt; {
+            const users = UserManager.getAllUsers();
+            const index = users.findIndex(u =&gt; u.id === userId);
+            if (index === -1) return null;
+            
+            users[index] = {
+                ...users[index],
+                ...updates,
+                updatedAt: new Date().toISOString()
+            };
+            
+            DataManager.setData(SYSTEM_CONFIG.STORAGE_KEYS.USERS, users);
+            UserManager.userIndex.set(userId, users[index]);
+            
+            CacheManager.invalidatePattern(&#039;team_&#039;);
+            return users[index];
+        },
+        
+        // 验证登录
+        validateLogin: (username, password) =&gt; {
+            const user = UserManager.getUserByUsername(username);
+            if (!user) {
+                return { valid: false, error: &#039;用户不存在&#039; };
+            }
+            if (user.password !== password) {
+                return { valid: false, error: &#039;密码错误&#039; };
+            }
+            return { valid: true, user };
+        },
+        
+        // 计算团队大小
+        calculateTeamSize: (userId, maxDepth = 7, currentDepth = 0, visited = new Set()) =&gt; {
+            const cacheKey = `team_size_${userId}`;
+            const cached = CacheManager.get(cacheKey);
+            if (cached !== null &amp;&amp; currentDepth === 0) return cached;
+            
+            if (currentDepth &gt;= maxDepth || visited.has(userId)) return 0;
+            visited.add(userId);
+            
+            const user = UserManager.getUser(userId);
+            if (!user || !user.referredUsers || user.referredUsers.length === 0) return 0;
+            
+            let total = user.referredUsers.length;
+            user.referredUsers.forEach(refId =&gt; {
+                total += UserManager.calculateTeamSize(refId, maxDepth, currentDepth + 1, visited);
+            });
+            
+            if (currentDepth === 0) {
+                CacheManager.set(cacheKey, total, 60000);
+            }
+            return total;
+        },
+        
+        // 计算最大深度
+        calculateMaxDepth: (userId, maxDepth = 7, currentDepth = 0, visited = new Set()) =&gt; {
+            if (currentDepth &gt;= maxDepth || visited.has(userId)) return currentDepth;
+            visited.add(userId);
+            
+            const user = UserManager.getUser(userId);
+            if (!user || !user.referredUsers || user.referredUsers.length === 0) {
+                return currentDepth;
+            }
+            
+            let max = currentDepth;
+            user.referredUsers.forEach(refId =&gt; {
+                const depth = UserManager.calculateMaxDepth(refId, maxDepth, currentDepth + 1, visited);
+                max = Math.max(max, depth);
+            });
+            return max;
+        },
+        
+        // 获取上级链
+        getUplineChain: (userId, maxDepth = 7) =&gt; {
+            const users = UserManager.getAllUsers();
+            const chain = [];
+            let currentUser = UserManager.getUser(userId);
+            
+            while (currentUser &amp;&amp; chain.length &lt; maxDepth) {
+                const inviter = users.find(u =&gt; 
+                    u.referredUsers &amp;&amp; u.referredUsers.includes(currentUser.id)
+                );
+                if (inviter) {
+                    chain.push(inviter);
+                    currentUser = inviter;
+                } else {
+                    break;
+                }
+            }
+            return chain;
+        }
+    };
+
+    // ==================== 分润计算器 ====================
+    const ProfitCalculator = {
+        // 计算七级分润
+        calculateSevenLevelProfit: (amount) =&gt; {
+            const profits = [];
+            let totalProfit = 0;
+            
+            SYSTEM_CONFIG.PROFIT_RATES.forEach((rate, index) =&gt; {
+                const profitAmount = Math.round(amount * rate * 100) / 100;
+                totalProfit += profitAmount;
+                profits.push({
+                    level: index + 1,
+                    rate,
+                    amount: profitAmount,
+                    percentage: (rate * 100).toFixed(1)
+                });
+            });
+            
+            return {
+                profits,
+                totalProfit: Math.round(totalProfit * 100) / 100,
+                remainingAmount: Math.round((amount - totalProfit) * 100) / 100
+            };
+        },
+        
+        // 生成分润记录
+        generateCommissions: (userId, amount) =&gt; {
+            const uplines = UserManager.getUplineChain(userId);
+            const commissions = DataManager.getData(SYSTEM_CONFIG.STORAGE_KEYS.COMMISSIONS);
+            
+            uplines.forEach((upline, index) =&gt; {
+                if (index &lt; SYSTEM_CONFIG.MAX_LEVEL_DEPTH) {
+                    const rate = SYSTEM_CONFIG.PROFIT_RATES[index];
+                    const commission = {
+                        id: Utils.generateId() + index,
+                        fromUserId: userId,
+                        toUserId: upline.id,
+                        level: index + 1,
+                        rate,
+                        amount: Math.round(amount * rate * 100) / 100,
+                        createdAt: new Date().toISOString()
+                    };
+                    commissions.push(commission);
+                }
+            });
+            
+            DataManager.setData(SYSTEM_CONFIG.STORAGE_KEYS.COMMISSIONS, commissions);
+            return commissions;
+        },
+        
+        // 获取用户分润
+        getUserCommissions: (userId) =&gt; {
+            const commissions = DataManager.getData(SYSTEM_CONFIG.STORAGE_KEYS.COMMISSIONS);
+            return commissions.filter(c =&gt; c.toUserId === userId);
+        },
+        
+        // 计算用户总收益
+        calculateUserEarnings: (userId) =&gt; {
+            const commissions = ProfitCalculator.getUserCommissions(userId);
+            return commissions.reduce((sum, c) =&gt; sum + c.amount, 0);
+        }
+    };
+
+    // ==================== 安全验证器 ====================
+    const SecurityValidator = {
+        // 验证用户输入
+        validateInput: (input, type = &#039;text&#039;) =&gt; {
+            if (!input || typeof input !== &#039;string&#039;) {
+                return { valid: false, error: &#039;输入不能为空&#039; };
+            }
+            
+            const sanitized = Utils.escapeHtml(input.trim());
+            
+            if (sanitized.length === 0) {
+                return { valid: false, error: &#039;输入不能为空&#039; };
+            }
+            
+            if (sanitized.length &gt; SYSTEM_CONFIG.SECURITY.MAX_INPUT_LENGTH) {
+                return { valid: false, error: &#039;输入过长&#039; };
+            }
+            
+            switch (type) {
+                case &#039;username&#039;:
+                    if (sanitized.length &lt; SYSTEM_CONFIG.SECURITY.USERNAME_MIN_LENGTH) {
+                        return { valid: false, error: `用户名至少${SYSTEM_CONFIG.SECURITY.USERNAME_MIN_LENGTH}个字符` };
+                    }
+                    if (!/^[a-zA-Z0-9_\u4e00-\u9fa5]+$/.test(sanitized)) {
+                        return { valid: false, error: &#039;用户名只能包含字母、数字、下划线或中文&#039; };
+                    }
+                    break;
+                    
+                case &#039;password&#039;:
+                    if (sanitized.length &lt; SYSTEM_CONFIG.SECURITY.PASSWORD_MIN_LENGTH) {
+                        return { valid: false, error: `密码至少${SYSTEM_CONFIG.SECURITY.PASSWORD_MIN_LENGTH}个字符` };
+                    }
+                    break;
+                    
+                case &#039;wallet&#039;:
+                    if (sanitized &amp;&amp; !/^T[1-9A-HJ-NP-Za-km-z]{25,34}$/.test(sanitized)) {
+                        return { valid: false, error: &#039;请输入有效的TRC-20钱包地址&#039; };
+                    }
+                    break;
+            }
+            
+            return { valid: true, value: sanitized };
+        },
+        
+        // 验证文件上传
+        validateFile: (file, options = {}) =&gt; {
+            const maxSize = options.maxSize || 5 * 1024 * 1024;
+            const allowedTypes = options.allowedTypes || [&#039;image/jpeg&#039;, &#039;image/png&#039;, &#039;image/gif&#039;];
+            
+            if (!file) {
+                return { valid: false, error: &#039;请选择文件&#039; };
+            }
+            if (!allowedTypes.includes(file.type)) {
+                return { valid: false, error: &#039;不支持的文件格式&#039; };
+            }
+            if (file.size &gt; maxSize) {
+                return { valid: false, error: &#039;文件过大&#039; };
+            }
+            return { valid: true };
+        }
+    };
+
+    // ==================== 权限管理器 ====================
+    const PermissionManager = {
+        // 检查权限
+        hasPermission: (user, permission) =&gt; {
+            if (!user || !user.role) return false;
+            const role = ADMIN_ROLES[user.role];
+            if (!role) return false;
+            if (role.permissions.includes(&#039;all&#039;)) return true;
+            return role.permissions.includes(permission);
+        },
+        
+        // 检查任一权限
+        hasAnyPermission: (user, permissions) =&gt; {
+            return permissions.some(p =&gt; PermissionManager.hasPermission(user, p));
+        },
+        
+        // 检查所有权限
+        hasAllPermissions: (user, permissions) =&gt; {
+            return permissions.every(p =&gt; PermissionManager.hasPermission(user, p));
+        },
+        
+        // 获取角色信息
+        getRoleInfo: (user) =&gt; {
+            if (!user || !user.role) return null;
+            return ADMIN_ROLES[user.role] || null;
+        },
+        
+        // 记录操作日志
+        logAction: (adminId, action, targetType, targetId, details = {}) =&gt; {
+            const logs = DataManager.getData(SYSTEM_CONFIG.STORAGE_KEYS.ADMIN_LOGS);
+            const log = {
+                id: Utils.generateId(),
+                adminId,
+                action,
+                targetType,
+                targetId,
+                details,
+                timestamp: new Date().toISOString()
+            };
+            logs.unshift(log);
+            if (logs.length &gt; 1000) logs.splice(1000);
+            DataManager.setData(SYSTEM_CONFIG.STORAGE_KEYS.ADMIN_LOGS, logs);
+        }
+    };
+
+    // ==================== 会话管理器 ====================
+    const SessionManager = {
+        // 获取当前用户
+        getCurrentUser: () =&gt; {
+            return DataManager.getData(SYSTEM_CONFIG.STORAGE_KEYS.CURRENT_USER, null);
+        },
+        
+        // 设置当前用户
+        setCurrentUser: (user) =&gt; {
+            DataManager.setData(SYSTEM_CONFIG.STORAGE_KEYS.CURRENT_USER, user);
+            DataManager.setData(SYSTEM_CONFIG.STORAGE_KEYS.LAST_LOGIN_TIME, Date.now().toString());
+        },
+        
+        // 清除会话
+        clearSession: () =&gt; {
+            DataManager.removeData(SYSTEM_CONFIG.STORAGE_KEYS.CURRENT_USER);
+            DataManager.removeData(SYSTEM_CONFIG.STORAGE_KEYS.LAST_LOGIN_TIME);
+            DataManager.removeData(SYSTEM_CONFIG.STORAGE_KEYS.AUTO_LOGIN);
+        },
+        
+        // 检查会话有效性
+        isSessionValid: () =&gt; {
+            const lastLogin = DataManager.getData(SYSTEM_CONFIG.STORAGE_KEYS.LAST_LOGIN_TIME, null);
+            if (!lastLogin) return false;
+            const elapsed = Date.now() - parseInt(lastLogin);
+            return elapsed &lt; SYSTEM_CONFIG.SECURITY.SESSION_TIMEOUT;
+        },
+        
+        // 检查账号锁定
+        isAccountLocked: () =&gt; {
+            const attempts = parseInt(DataManager.getData(SYSTEM_CONFIG.STORAGE_KEYS.LOGIN_ATTEMPTS, &#039;0&#039;));
+            const lastFailed = DataManager.getData(SYSTEM_CONFIG.STORAGE_KEYS.LAST_FAILED_TIME, null);
+            
+            if (attempts &gt;= SYSTEM_CONFIG.SECURITY.MAX_LOGIN_ATTEMPTS &amp;&amp; lastFailed) {
+                const elapsed = Date.now() - parseInt(lastFailed);
+                return elapsed &lt; SYSTEM_CONFIG.SECURITY.LOCKOUT_DURATION;
+            }
+            return false;
+        },
+        
+        // 记录登录失败
+        recordLoginFailure: () =&gt; {
+            const attempts = parseInt(DataManager.getData(SYSTEM_CONFIG.STORAGE_KEYS.LOGIN_ATTEMPTS, &#039;0&#039;));
+            DataManager.setData(SYSTEM_CONFIG.STORAGE_KEYS.LOGIN_ATTEMPTS, (attempts + 1).toString());
+            DataManager.setData(SYSTEM_CONFIG.STORAGE_KEYS.LAST_FAILED_TIME, Date.now().toString());
+        },
+        
+        // 清除登录失败记录
+        clearLoginFailures: () =&gt; {
+            DataManager.removeData(SYSTEM_CONFIG.STORAGE_KEYS.LOGIN_ATTEMPTS);
+            DataManager.removeData(SYSTEM_CONFIG.STORAGE_KEYS.LAST_FAILED_TIME);
+        }
+    };
+
+    // ==================== 错误处理器 ====================
+    const ErrorHandler = {
+        handle: (error, context = &#039;&#039;) =&gt; {
+            console.error(`[${context}]`, error);
+            
+            const logs = DataManager.getData(SYSTEM_CONFIG.STORAGE_KEYS.ERROR_LOGS);
+            logs.unshift({
+                message: error.message || String(error),
+                context,
+                timestamp: new Date().toISOString()
+            });
+            if (logs.length &gt; 100) logs.splice(100);
+            DataManager.setData(SYSTEM_CONFIG.STORAGE_KEYS.ERROR_LOGS, logs);
+            
+            return error.message || &#039;操作失败&#039;;
+        }
+    };
+
+    // ==================== 初始化函数 ====================
+    const initializeApp = () =&gt; {
+        try {
+            // 初始化用户索引
+            UserManager.initIndex();
+            
+            // 检查并初始化管理员账户
+            const users = UserManager.getAllUsers();
+            if (users.length === 0 || !users.find(u =&gt; u.role === &#039;admin&#039;)) {
+                const adminUser = {
+                    id: 1,
+                    username: &#039;admin&#039;,
+                    password: &#039;admin123&#039;,
+                    role: &#039;admin&#039;,
+                    activationStatus: &#039;active&#039;,
+                    walletAddress: &#039;&#039;,
+                    inviteCodes: [],
+                    referredUsers: [],
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                };
+                const allUsers = users.length &gt; 0 ? users : [];
+                allUsers.push(adminUser);
+                DataManager.setData(SYSTEM_CONFIG.STORAGE_KEYS.USERS, allUsers);
+                UserManager.initIndex();
+            }
+            
+            // 初始化其他数据
+            if (!localStorage.getItem(SYSTEM_CONFIG.STORAGE_KEYS.ACTIVATIONS)) {
+                DataManager.setData(SYSTEM_CONFIG.STORAGE_KEYS.ACTIVATIONS, []);
+            }
+            if (!localStorage.getItem(SYSTEM_CONFIG.STORAGE_KEYS.COMMISSIONS)) {
+                DataManager.setData(SYSTEM_CONFIG.STORAGE_KEYS.COMMISSIONS, []);
+            }
+            
+            console.log(&#039;梦之缘平台核心模块初始化完成 v3.0&#039;);
+            return true;
+        } catch (error) {
+            ErrorHandler.handle(error, &#039;initializeApp&#039;);
+            return false;
+        }
+    };
+
+    // ==================== 导出到全局 ====================
+    global.Utils = Utils;
+    global.DataManager = DataManager;
+    global.CacheManager = CacheManager;
+    global.UserManager = UserManager;
+    global.ProfitCalculator = ProfitCalculator;
+    global.SecurityValidator = SecurityValidator;
+    global.PermissionManager = PermissionManager;
+    global.SessionManager = SessionManager;
+    global.ErrorHandler = ErrorHandler;
+    global.initializeApp = initializeApp;
+
+    // 页面加载时自动初始化
+    if (typeof document !== &#039;undefined&#039;) {
+        document.addEventListener(&#039;DOMContentLoaded&#039;, initializeApp);
+    }
+
+})(typeof window !== &#039;undefined&#039; ? window : this);</textarea>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <p>.</p>
+  </div>
+</footer>
+
+<script type="text/html" id="complexity-popover-template">
+  <div class="complexity-notice">
+    Complexity : {{ cyclomatic }} <br>
+    Length : {{ halstead.length }} <br>
+    Difficulty : {{ halstead.difficulty.toFixed(2) }} <br>
+    Est # bugs : {{ halstead.bugs.toFixed(2) }}<br>
+  </div>
+</script>
+
+<script type="text/javascript" src="../../assets/scripts/bundles/core-bundle.js"></script>
+<script type="text/javascript" src="../../assets/scripts/bundles/codemirror.js"></script>
+<script type="text/javascript" src="../../assets/scripts/codemirror.markpopovertext.js"></script>
+<script type="text/javascript" src="report.js"></script>
+<script type="text/javascript" src="report.history.js"></script>
+<script type="text/javascript" src="../../assets/scripts/plato-file.js"></script>
+</body>
+</html>

@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理员登录 - 梦之缘创业投资平台</title>
+    <meta name="description" content="梦之缘创业投资平台管理员登录">
+    <meta name="keywords" content="管理员登录,后台管理,投资平台">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- DaisyUI -->
+    <link href="https://cdn.bootcdn.net/ajax/libs/daisyui/4.12.10/full.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- 核心模块 -->
+    <script src="js/config.js"></script>
+    <script src="js/core.js"></script>
+    <script src="js/api.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+        
+        :root {
+            --primary: 45 100% 50%; /* 金色 */
+            --primary-dark: 45 100% 40%;
+            --secondary: 210 40% 98%;
+            --accent: 0 0% 100%;
+            --background: 0 0% 99%;
+            --foreground: 222.2 84% 4.9%;
+            --muted: 210 40% 96%;
+            --border: 214.3 31.8% 91.4%;
+            --error: 0 84.2% 60.2%;
+            
+            /* 渐变 */
+            --gradient-gold: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-dark)));
+            --gradient-subtle: linear-gradient(180deg, hsl(var(--background)), hsl(var(--muted)));
+            
+            /* 阴影 */
+            --shadow-elegant: 0 10px 30px -10px hsl(var(--primary) / 0.2);
+            --shadow-card: 0 4px 20px hsl(var(--foreground) / 0.08);
+            --shadow-error: 0 4px 20px hsl(var(--error) / 0.15);
+            
+            /* 动画 */
+            --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        body {
+            font-family: 'Noto Sans SC', 'Inter', sans-serif;
+            background: hsl(var(--background));
+            color: hsl(var(--foreground));
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .gradient-gold {
+            background: var(--gradient-gold);
+        }
+        
+        .text-gold {
+            color: hsl(var(--primary));
+        }
+        
+        .bg-gold {
+            background-color: hsl(var(--primary));
+        }
+        
+        .hover-gold:hover {
+            background-color: hsl(var(--primary-dark));
+        }
+        
+        .shadow-card {
+            box-shadow: var(--shadow-card);
+        }
+        
+        .shadow-error {
+            box-shadow: var(--shadow-error);
+        }
+        
+        .card-hover {
+            transition: var(--transition-smooth);
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-elegant);
+        }
+        
+        /* 输入框聚焦效果 */
+        .input-focus:focus {
+            border-color: hsl(var(--primary));
+            box-shadow: 0 0 0 3px hsl(var(--primary) / 0.1);
+        }
+        
+        /* 错误状态 */
+        .input-error {
+            border-color: hsl(var(--error));
+            box-shadow: 0 0 0 3px hsl(var(--error) / 0.1);
+        }
+        
+        /* 按钮波纹效果 */
+        .btn-ripple {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-ripple::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: hsl(var(--primary) / 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        
+        .btn-ripple:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+        
+        /* 登录框动画 */
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .animate-slideInUp {
+            animation: slideInUp 0.6s ease-out;
+        }
+        
+        /* 错误提示动画 */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+        
+        .animate-shake {
+            animation: shake 0.5s ease-in-out;
+        }
+        
+        /* 背景装饰 */
+        .bg-decoration {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            overflow: hidden;
+        }
+        
+        .bg-decoration::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, hsl(var(--primary) / 0.05) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        /* 安全图标动画 */
+        .security-icon {
+            animation: securityPulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes securityPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        /* 自定义滚动条 */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: hsl(var(--muted));
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: hsl(var(--primary));
+            border-radius: 3px;
+        }
+        
+        /* 加载动画 */
+        .loading-spinner {
+            border: 2px solid hsl(var(--muted));
+            border-top: 2px solid hsl(var(--primary));
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 背景装饰 -->
+    <div class="bg-decoration"></div>
+
+    <!-- 主容器 -->
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-md mx-auto">
+            <!-- 登录卡片 -->
+            <div class="card-hover bg-white rounded-2xl shadow-card p-8 animate-slideInUp">
+                <!-- 头部 -->
+                <div class="text-center mb-8">
+                    <div class="w-16 h-16 gradient-gold rounded-2xl flex items-center justify-center mx-auto mb-4 security-icon">
+                        <i class="fas fa-shield-alt text-white text-2xl"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-900 mb-2">管理员登录</h2>
+                    <p class="text-gray-600">梦之缘创业投资平台管理后台</p>
+                </div>
+
+                <!-- 登录表单 -->
+                <form id="loginForm" onsubmit="handleAdminLogin(event)">
+                    <div class="space-y-6">
+                        <!-- 用户名输入 -->
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text text-gray-700 font-medium">管理员邮箱</span>
+                            </label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                                    <i class="fas fa-envelope"></i>
+                                </span>
+                                <input type="email" id="adminUsername" class="input input-bordered w-full pl-10 pr-4 input-focus" placeholder="请输入管理员邮箱" required>
+                            </div>
+                            <label class="label hidden" id="usernameError">
+                                <span class="label-text-alt text-error"></span>
+                            </label>
+                        </div>
+
+                        <!-- 密码输入 -->
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text text-gray-700 font-medium">管理员密码</span>
+                            </label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                                    <i class="fas fa-lock"></i>
+                                </span>
+                                <input type="password" id="adminPassword" class="input input-bordered w-full pl-10 pr-12 input-focus" placeholder="请输入管理员密码" required>
+                                <button type="button" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600" onclick="togglePassword()">
+                                    <i class="fas fa-eye" id="passwordToggle"></i>
+                                </button>
+                            </div>
+                            <label class="label hidden" id="passwordError">
+                                <span class="label-text-alt text-error"></span>
+                            </label>
+                        </div>
+
+                        <!-- 记住我 -->
+                        <div class="form-control">
+                            <label class="cursor-pointer label justify-start">
+                                <input type="checkbox" id="rememberMe" class="checkbox checkbox-primary mr-2">
+                                <span class="label-text text-gray-700">记住登录状态</span>
+                            </label>
+                        </div>
+
+                        <!-- 登录按钮 -->
+                        <div class="form-control mt-6">
+                            <button type="submit" id="loginBtn" class="btn gradient-gold text-white hover-gold border-none w-full btn-ripple">
+                                <span id="loginText">登录</span>
+                                <div id="loginSpinner" class="loading-spinner hidden ml-2"></div>
+                            </button>
+                            <button type="button" id="loginLoading" class="btn gradient-gold text-white border-none w-full hidden" disabled>
+                                <div class="loading-spinner mr-2"></div>
+                                登录中...
+                            </button>
+                        </div>
+
+                        <!-- 返回首页 -->
+                        <div class="text-center mt-6">
+                            <a href="index.html" class="text-gray-600 hover:text-gold transition-colors text-sm">
+                                <i class="fas fa-arrow-left mr-1"></i>返回首页
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- 安全提示 -->
+            <div class="mt-6 text-center">
+                <div class="inline-flex items-center space-x-2 text-gray-500 text-sm">
+                    <i class="fas fa-info-circle"></i>
+                    <span>请确保您是该平台的管理员</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeAdminLogin();
+            checkAutoLogin();
+        });
+
+        // 初始化管理员登录
+        function initializeAdminLogin() {
+            // 检查是否有记住的登录信息
+            const rememberedUsername = DataManager.getData(SYSTEM_CONFIG.STORAGE_KEYS.REMEMBERED_USERNAME, null);
+            if (rememberedUsername) {
+                document.getElementById('adminUsername').value = rememberedUsername;
+                document.getElementById('rememberMe').checked = true;
+            }
+
+            // 检查账号锁定
+            if (SessionManager.isAccountLocked()) {
+                const remainingTime = Math.ceil(SYSTEM_CONFIG.SECURITY.LOCKOUT_DURATION / 60000);
+                showError('usernameError', `账号已锁定，请${remainingTime}分钟后再试`);
+                disableLoginButton();
+            }
+        }
+
+        // 检查自动登录
+        async function checkAutoLogin() {
+            const autoLogin = DataManager.getData(SYSTEM_CONFIG.STORAGE_KEYS.AUTO_LOGIN, null);
+            
+            if (autoLogin === 'true' && ApiClient.getToken()) {
+                try {
+                    const user = await ApiClient.fetch('/auth/user');
+                    if (user && user.role === 'admin') {
+                        window.location.href = 'admin.html';
+                    }
+                } catch (e) {}
+            }
+        }
+
+        // 处理管理员登录
+        async function handleAdminLogin(event) {
+            event.preventDefault();
+            
+            // 清除之前的错误
+            clearErrors();
+            
+            // 获取输入值
+            const email = document.getElementById('adminUsername').value.trim();
+            const password = document.getElementById('adminPassword').value;
+            const rememberMe = document.getElementById('rememberMe').checked;
+            
+            // 验证输入
+            if (!email) {
+                showError('usernameError', '请输入管理员邮箱');
+                highlightError('adminUsername');
+                return;
+            }
+            
+            if (!password) {
+                showError('passwordError', '请输入密码');
+                highlightError('adminPassword');
+                return;
+            }
+            
+            // 检查账号锁定
+            if (SessionManager.isAccountLocked()) {
+                showError('usernameError', '账号已锁定，请稍后再试');
+                return;
+            }
+            
+            // 显示加载状态
+            showLoadingState();
+            
+            try {
+                const response = await fetch(`${SYSTEM_CONFIG.API_BASE_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    if (data.user.role === 'admin') {
+                        // 登录成功
+                        localStorage.setItem('auth_token', data.access_token);
+                        handleLoginSuccess(data.user, rememberMe);
+                    } else {
+                        handleLoginFailure('该账号没有管理员权限');
+                    }
+                } else {
+                    handleLoginFailure(data.message || '登录失败');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                handleLoginFailure('系统错误，请检查网络');
+            }
+        }
+
+        // 处理登录成功
+        function handleLoginSuccess(admin, rememberMe) {
+            // 清除登录失败记录
+            SessionManager.clearLoginFailures();
+            
+            // 设置记住我
+            if (rememberMe) {
+                DataManager.setData(SYSTEM_CONFIG.STORAGE_KEYS.REMEMBERED_USERNAME, admin.username);
+                DataManager.setData(SYSTEM_CONFIG.STORAGE_KEYS.AUTO_LOGIN, 'true');
+            } else {
+                DataManager.removeData(SYSTEM_CONFIG.STORAGE_KEYS.REMEMBERED_USERNAME);
+                DataManager.removeData(SYSTEM_CONFIG.STORAGE_KEYS.AUTO_LOGIN);
+            }
+            
+            // 设置会话
+            SessionManager.setCurrentUser(admin);
+            
+            // 记录登录日志
+            PermissionManager.logAction(admin.id, ADMIN_ACTIONS.LOGIN, 'admin', admin.id, {
+                username: admin.username,
+                role: admin.role
+            });
+            
+            // 显示成功消息
+            showSuccessMessage('登录成功，正在跳转...');
+            
+            // 跳转到后台
+            setTimeout(() => {
+                window.location.href = 'admin.html';
+            }, 1000);
+        }
+
+        // 处理登录失败
+        function handleLoginFailure(errorMessage) {
+            SessionManager.recordLoginFailure();
+            
+            const attempts = parseInt(DataManager.getData(SYSTEM_CONFIG.STORAGE_KEYS.LOGIN_ATTEMPTS, '0'));
+            
+            if (attempts >= SYSTEM_CONFIG.SECURITY.MAX_LOGIN_ATTEMPTS) {
+                showError('usernameError', `账号已锁定，请${SYSTEM_CONFIG.SECURITY.LOCKOUT_DURATION / 60000}分钟后再试`);
+                disableLoginButton();
+            } else {
+                const remainingAttempts = SYSTEM_CONFIG.SECURITY.MAX_LOGIN_ATTEMPTS - attempts;
+                showError('usernameError', `${errorMessage}，还有${remainingAttempts}次机会`);
+            }
+            
+            // 添加错误动画
+            document.getElementById('loginForm').classList.add('animate-shake');
+            setTimeout(() => {
+                document.getElementById('loginForm').classList.remove('animate-shake');
+            }, 500);
+            
+            hideLoadingState();
+        }
+
+        // 显示错误信息
+        function showError(elementId, message) {
+            const errorElement = document.getElementById(elementId);
+            errorElement.querySelector('.label-text-alt').textContent = message;
+            errorElement.classList.remove('hidden');
+        }
+
+        // 清除错误
+        function clearErrors() {
+            document.getElementById('usernameError').classList.add('hidden');
+            document.getElementById('passwordError').classList.add('hidden');
+            
+            // 清除输入框错误样式
+            document.getElementById('adminUsername').classList.remove('input-error');
+            document.getElementById('adminPassword').classList.remove('input-error');
+        }
+
+        // 高亮错误输入框
+        function highlightError(elementId) {
+            document.getElementById(elementId).classList.add('input-error');
+        }
+
+        // 显示加载状态
+        function showLoadingState() {
+            document.getElementById('loginBtn').classList.add('hidden');
+            document.getElementById('loginLoading').classList.remove('hidden');
+            
+            // 禁用输入框
+            document.getElementById('adminUsername').disabled = true;
+            document.getElementById('adminPassword').disabled = true;
+            document.getElementById('rememberMe').disabled = true;
+        }
+
+        // 隐藏加载状态
+        function hideLoadingState() {
+            document.getElementById('loginBtn').classList.remove('hidden');
+            document.getElementById('loginLoading').classList.add('hidden');
+            
+            // 启用输入框
+            document.getElementById('adminUsername').disabled = false;
+            document.getElementById('adminPassword').disabled = false;
+            document.getElementById('rememberMe').disabled = false;
+        }
+
+        // 禁用登录按钮
+        function disableLoginButton() {
+            document.getElementById('loginBtn').disabled = true;
+            document.getElementById('loginBtn').classList.add('opacity-50', 'cursor-not-allowed');
+        }
+
+        // 显示成功消息
+        function showSuccessMessage(message) {
+            // 可以在这里添加成功提示的UI
+            console.log('Success:', message);
+        }
+
+        // 切换密码显示
+        function togglePassword() {
+            const passwordInput = document.getElementById('adminPassword');
+            const toggleIcon = document.getElementById('passwordToggle');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.className = 'fas fa-eye-slash';
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.className = 'fas fa-eye';
+            }
+        }
+
+        // 监听输入框变化，清除错误状态
+        document.getElementById('adminUsername').addEventListener('input', function() {
+            document.getElementById('usernameError').classList.add('hidden');
+            this.classList.remove('input-error');
+        });
+
+        document.getElementById('adminPassword').addEventListener('input', function() {
+            document.getElementById('passwordError').classList.add('hidden');
+            this.classList.remove('input-error');
+        });
+
+        // 监听回车键
+        document.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter' && !event.target.disabled) {
+                event.preventDefault();
+                document.getElementById('loginForm').dispatchEvent(new Event('submit'));
+            }
+        });
+    </script>
+</body>
+</html>

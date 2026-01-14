@@ -1,0 +1,53 @@
+name: MCP Release Feishu Notify
+
+on:
+  issues:
+    types: [opened, edited, labeled]
+
+permissions:
+  issues: write
+
+jobs:
+  notify:
+    if: contains(github.event.issue.labels.*.name, 'release')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Skip if already notified
+        id: skip
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const labels = (context.payload.issue.labels || []).map(l => l.name)
+            core.setOutput("notified", labels.includes("feishu-notified") ? "true" : "false")
+
+      - name: Notify Feishu when checklist_status is completed
+        if: steps.skip.outputs.notified != 'true'
+        env:
+          FEISHU_WEBHOOK_URL: ${{ secrets.FEISHU_WEBHOOK_URL }}
+        run: |
+          if [ -z "$FEISHU_WEBHOOK_URL" ]; then
+            echo "FEISHU_WEBHOOK_URL is not set; skipping."
+            exit 0
+          fi
+          BODY="${{ github.event.issue.body }}"
+          echo "$BODY" | grep -qi "checklist_status.*completed" || exit 0
+          TITLE="${{ github.event.issue.title }}"
+          URL="${{ github.event.issue.html_url }}"
+          payload=$(jq -n --arg text "Release Checklist 已完成：$TITLE\n$URL" '{msg_type:"text",content:{text:$text}}')
+          curl -sS -X POST -H "Content-Type: application/json" -d "$payload" "$FEISHU_WEBHOOK_URL" >/dev/null
+
+      - name: Mark notified
+        if: steps.skip.outputs.notified != 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = context.payload.issue
+            const body = issue.body || ""
+            if (!/checklist_status.*completed/i.test(body)) return
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issue.number,
+              labels: ["feishu-notified"]
+            })
+

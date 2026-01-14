@@ -1,0 +1,30 @@
+name: MCP PR Enforcer
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  pull-requests: write
+
+jobs:
+  require_linked_issue:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check PR description contains Closes #
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request
+            const body = pr.body || ""
+            const ok = /closes\s+#\d+/i.test(body) || /fixes\s+#\d+/i.test(body) || /resolves\s+#\d+/i.test(body)
+            if (ok) return
+            const msg = "缺少任务关联：请在 PR 描述中包含 `Closes #<任务ID>`（MCP 强制门禁）。"
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pr.number,
+              body: msg
+            })
+            core.setFailed(msg)
+

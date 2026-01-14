@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Plato - js\config.js</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+
+  <link href="../../assets/css/vendor/morris.css" rel="stylesheet">
+  <link href="../../assets/css/vendor/bootstrap.css" rel="stylesheet">
+  <link href="../../assets/css/vendor/font-awesome.css" rel="stylesheet">
+  <link href="../../assets/css/vendor/codemirror.css" rel="stylesheet">
+  <link href="../../assets/css/plato.css" rel="stylesheet">
+  <link href="../../assets/css/plato-file.css" rel="stylesheet">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-fixed-top">
+  <div class="container">
+    <a class="navbar-brand" href="http://github.com/es-analysis/plato">Plato on Github</a>
+    <ul class="nav navbar-nav">
+      <li>
+        <a href="../../index.html">Report Home</a>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<div class="jumbotron">
+  <div class="container">
+    <h1>js\config.js</h1>
+  </div>
+</div>
+
+<div class="container aggregate-stats">
+  <div class="row">
+    <div class="col-md-6">
+      <h2 class="header">Maintainability <a href="http://blogs.msdn.com/b/codeanalysis/archive/2007/11/20/maintainability-index-range-and-meaning.aspx"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="A value between 0 and 100 that represents the relative ease of maintaining the code. A high value means better maintainability." data-original-title="Maintainability Index"  data-container="body"></i></a></h2>
+      <p class="stat">38.83</p>
+    </div>
+    <div class="col-md-6">
+      <h2 class="header">Lines of code <i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Source Lines of Code / Logical Lines of Code" data-original-title="SLOC/LSLOC" data-container="body"></i></h2>
+      <p class="stat">147</p>
+    </div>
+  </div>
+  <div class="row historical">
+    <div class="col-md-6">
+      <p id="chart_historical_maint" class="chart"></p>
+    </div>
+    <div class="col-md-6">
+      <p id="chart_historical_sloc" class="chart"></p>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-6">
+      <h2 class="header">Difficulty  <a href="http://en.wikipedia.org/wiki/Halstead_complexity_measures"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="The difficulty measure is related to the difficulty of the program to write or understand." data-original-title="Difficulty" data-container="body"></i></a></h2>
+      <p class="stat">8.55</p>
+    </div>
+    <div class="col-md-6">
+      <h2 class="header">Estimated Errors  <a href="http://en.wikipedia.org/wiki/Halstead_complexity_measures"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Halstead's delivered bugs is an estimate for the number of errors in the implementation." data-original-title="Delivered Bugs" data-container="body"></i></a></h2>
+      <p class="stat">0.84</p>
+    </div>
+  </div>
+</div>
+
+<div class="container charts">
+  <div class="row">
+    <h2 class="header">Function weight</h2>
+  </div>
+  <div class="row">
+    <div class="col-md-6">
+      <h3 class="chart-header">By Complexity <a href="http://en.wikipedia.org/wiki/Cyclomatic_complexity"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="This metric counts the number of distinct paths through a block of code. Lower values are better." data-original-title="Cyclomatic Complexity" data-container="body"></i></a></h3>
+      <div id="fn-by-complexity" class="stat"></div>
+    </div>
+    <div class="col-md-6">
+      <h3 class="chart-header">By SLOC  <i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Source Lines of Code / Logical Lines of Code" data-original-title="SLOC/LSLOC" data-container="body"></i></h3>
+      <div id="fn-by-sloc" class="stat"></div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="row">
+    <textarea id="file-source" class="col-md-12">/**
+ * 梦之缘创业投资平台 - 统一配置中心
+ * @version 3.0
+ * @description 集中管理所有系统配置，避免重复定义
+ */
+
+(function(global) {
+    &#039;use strict&#039;;
+
+    // 系统核心配置
+    const SYSTEM_CONFIG = Object.freeze({
+        // 基础配置
+        PLATFORM_NAME: &#039;梦之缘创业投资平台&#039;,
+        VERSION: &#039;3.0.0&#039;,
+        CURRENCY: &#039;USD&#039;,
+        CURRENCY_SYMBOL: &#039;$&#039;,
+        API_BASE_URL: &#039;http://localhost:8000/api&#039;, // Laravel API地址
+        
+        // 用户配置
+        DIRECT_REFERRAL_LIMIT: 5,
+        MAX_LEVEL_DEPTH: 7,
+        INVITE_CODES_PER_USER: 5,
+        
+        // 激活配置
+        ACTIVATION_AMOUNT: 300,
+        
+        // 七级分润比例
+        PROFIT_RATES: Object.freeze([0.20, 0.08, 0.08, 0.06, 0.05, 0.05, 0.05]),
+        TOTAL_PROFIT_RATE: 0.57,
+        
+        // 资金池配置
+        POOL_CONFIG: Object.freeze({
+            TOTAL_DIVIDEND: 0.33,
+            ENTREPRENEUR_POOL: 0.30,
+            CHARITY_POOL: 0.03,
+            PLATFORM_RETENTION: 0.10,
+            REMAINING_POOL: 0.24
+        }),
+        
+        // 安全配置
+        SECURITY: Object.freeze({
+            MAX_LOGIN_ATTEMPTS: 5,
+            LOCKOUT_DURATION: 30 * 60 * 1000,
+            SESSION_TIMEOUT: 24 * 60 * 60 * 1000,
+            PASSWORD_MIN_LENGTH: 6,
+            USERNAME_MIN_LENGTH: 3,
+            MAX_INPUT_LENGTH: 255
+        }),
+        
+        // 存储键名
+        STORAGE_KEYS: Object.freeze({
+            USERS: &#039;mzy_users&#039;,
+            ACTIVATIONS: &#039;mzy_activations&#039;,
+            COMMISSIONS: &#039;mzy_commissions&#039;,
+            CURRENT_USER: &#039;mzy_currentUser&#039;,
+            ADMIN_LOGS: &#039;mzy_adminLogs&#039;,
+            LOGIN_ATTEMPTS: &#039;mzy_loginAttempts&#039;,
+            LAST_FAILED_TIME: &#039;mzy_lastFailedTime&#039;,
+            LAST_LOGIN_TIME: &#039;mzy_lastLoginTime&#039;,
+            AUTO_LOGIN: &#039;mzy_autoLogin&#039;,
+            REMEMBERED_USERNAME: &#039;mzy_rememberedUsername&#039;,
+            ERROR_LOGS: &#039;mzy_errorLogs&#039;
+        }),
+        
+        // 状态配置
+        STATUS: Object.freeze({
+            PENDING: &#039;pending&#039;,
+            APPROVED: &#039;approved&#039;,
+            REJECTED: &#039;rejected&#039;,
+            ACTIVE: &#039;active&#039;,
+            INACTIVE: &#039;inactive&#039;
+        }),
+        
+        // 角色配置
+        ROLES: Object.freeze({
+            USER: &#039;user&#039;,
+            ADMIN: &#039;admin&#039;,
+            SUPER_ADMIN: &#039;SUPER_ADMIN&#039;,
+            AUDITOR: &#039;AUDITOR&#039;,
+            VIEWER: &#039;VIEWER&#039;
+        })
+    });
+
+    // 管理员权限角色定义
+    const ADMIN_ROLES = Object.freeze({
+        SUPER_ADMIN: {
+            id: &#039;SUPER_ADMIN&#039;,
+            name: &#039;超级管理员&#039;,
+            description: &#039;拥有所有权限&#039;,
+            permissions: [&#039;all&#039;]
+        },
+        admin: {
+            id: &#039;admin&#039;,
+            name: &#039;普通管理员&#039;,
+            description: &#039;管理用户、审核充值、查看数据&#039;,
+            permissions: [
+                &#039;dashboard.view&#039;,
+                &#039;users.view&#039;, &#039;users.edit&#039;, &#039;users.delete&#039;,
+                &#039;activations.view&#039;, &#039;activations.approve&#039;, &#039;activations.reject&#039;,
+                &#039;commissions.view&#039;,
+                &#039;settings.view&#039;
+            ]
+        },
+        AUDITOR: {
+            id: &#039;AUDITOR&#039;,
+            name: &#039;审核员&#039;,
+            description: &#039;负责充值审核&#039;,
+            permissions: [
+                &#039;dashboard.view&#039;,
+                &#039;activations.view&#039;, &#039;activations.approve&#039;, &#039;activations.reject&#039;,
+                &#039;users.view&#039;,
+                &#039;commissions.view&#039;
+            ]
+        },
+        VIEWER: {
+            id: &#039;VIEWER&#039;,
+            name: &#039;观察员&#039;,
+            description: &#039;只能查看数据&#039;,
+            permissions: [
+                &#039;dashboard.view&#039;,
+                &#039;users.view&#039;,
+                &#039;activations.view&#039;,
+                &#039;commissions.view&#039;
+            ]
+        }
+    });
+
+    // 操作类型定义
+    const ADMIN_ACTIONS = Object.freeze({
+        LOGIN: &#039;login&#039;,
+        LOGOUT: &#039;logout&#039;,
+        VIEW_USER: &#039;view_user&#039;,
+        EDIT_USER: &#039;edit_user&#039;,
+        DELETE_USER: &#039;delete_user&#039;,
+        APPROVE_ACTIVATION: &#039;approve_activation&#039;,
+        REJECT_ACTIVATION: &#039;reject_activation&#039;,
+        VIEW_COMMISSION: &#039;view_commission&#039;,
+        EDIT_SETTING: &#039;edit_setting&#039;,
+        ACCESS_DENIED: &#039;access_denied&#039;
+    });
+
+    // 导出到全局
+    global.SYSTEM_CONFIG = SYSTEM_CONFIG;
+    global.ADMIN_ROLES = ADMIN_ROLES;
+    global.ADMIN_ACTIONS = ADMIN_ACTIONS;
+
+})(typeof window !== &#039;undefined&#039; ? window : this);</textarea>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <p>.</p>
+  </div>
+</footer>
+
+<script type="text/html" id="complexity-popover-template">
+  <div class="complexity-notice">
+    Complexity : {{ cyclomatic }} <br>
+    Length : {{ halstead.length }} <br>
+    Difficulty : {{ halstead.difficulty.toFixed(2) }} <br>
+    Est # bugs : {{ halstead.bugs.toFixed(2) }}<br>
+  </div>
+</script>
+
+<script type="text/javascript" src="../../assets/scripts/bundles/core-bundle.js"></script>
+<script type="text/javascript" src="../../assets/scripts/bundles/codemirror.js"></script>
+<script type="text/javascript" src="../../assets/scripts/codemirror.markpopovertext.js"></script>
+<script type="text/javascript" src="report.js"></script>
+<script type="text/javascript" src="report.history.js"></script>
+<script type="text/javascript" src="../../assets/scripts/plato-file.js"></script>
+</body>
+</html>

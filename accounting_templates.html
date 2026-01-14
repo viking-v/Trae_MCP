@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>梦之缘 - 自动化对账系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.bootcdn.net/ajax/libs/daisyui/4.12.10/full.min.css" rel="stylesheet">
+    <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- 核心模块 -->
+    <script src="js/config.js"></script>
+    <script src="js/core.js"></script>
+    <style>
+        :root {
+            --primary: 220 38% 13%;
+            --primary-glow: 220 38% 25%;
+            --accent: 45 96% 49%;
+            --accent-glow: 45 96% 35%;
+            --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
+            --gradient-accent: linear-gradient(135deg, hsl(var(--accent)), hsl(var(--accent-glow)));
+            --shadow-elegant: 0 10px 30px -10px hsl(var(--primary) / 0.3);
+            --shadow-glow: 0 0 40px hsl(var(--accent) / 0.4);
+        }
+        
+        .gradient-text {
+            background: var(--gradient-accent);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .dark .glass-card {
+            background: rgba(15, 23, 42, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .input-focus:focus {
+            box-shadow: var(--shadow-glow);
+            border-color: hsl(var(--accent));
+        }
+        
+        .btn-gradient {
+            background: var(--gradient-accent);
+            border: none;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-gradient:hover {
+            box-shadow: var(--shadow-glow);
+            transform: translateY(-2px);
+        }
+        
+        .table-row:hover {
+            background: hsl(var(--accent) / 0.1);
+            transition: all 0.2s ease;
+        }
+        
+        .animate-float {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-7xl">
+        <!-- Header -->
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold mb-4">
+                <span class="gradient-text">梦之缘对账系统</span>
+            </h1>
+            <p class="text-slate-600 dark:text-slate-300 text-lg">自动化七级分润对账与资金池分配</p>
+        </header>
+
+        <!-- Main Content -->
+        <main class="space-y-8">
+            <!-- Input Section -->
+            <section class="glass-card rounded-2xl p-8 shadow-xl">
+                <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-6 flex items-center">
+                    <i class="fas fa-calculator mr-3 text-yellow-500"></i>
+                    数据输入
+                </h2>
+                
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                            入金人数
+                        </label>
+                        <input type="number" id="memberCount" value="100" 
+                               class="w-full px-4 py-3 border border-slate-300 rounded-lg input-focus transition-all duration-300 bg-white dark:bg-slate-800 text-slate-900 dark:text-white">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                            单人入金金额 ($)
+                        </label>
+                        <input type="number" id="amountPerMember" value="300" 
+                               class="w-full px-4 py-3 border border-slate-300 rounded-lg input-focus transition-all duration-300 bg-white dark:bg-slate-800 text-slate-900 dark:text-white">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                            计算月份
+                        </label>
+                        <input type="month" id="calcMonth" value="2026-01" 
+                               class="w-full px-4 py-3 border border-slate-300 rounded-lg input-focus transition-all duration-300 bg-white dark:bg-slate-800 text-slate-900 dark:text-white">
+                    </div>
+                </div>
+                
+                <div class="mt-6 flex gap-4">
+                    <button onclick="calculateAll()" class="btn-gradient px-8 py-3 rounded-lg font-semibold">
+                        <i class="fas fa-chart-line mr-2"></i>计算对账
+                    </button>
+                    <button onclick="exportToCSV()" class="px-8 py-3 bg-slate-600 text-white rounded-lg font-semibold hover:bg-slate-700 transition-all">
+                        <i class="fas fa-download mr-2"></i>导出CSV
+                    </button>
+                </div>
+            </section>
+
+            <!-- Summary Cards -->
+            <section class="grid md:grid-cols-4 gap-6">
+                <div class="glass-card rounded-xl p-6 text-center shadow-lg">
+                    <div class="text-3xl font-bold text-green-600 mb-2" id="totalIncome">$0</div>
+                    <div class="text-slate-600 dark:text-slate-300">总入金</div>
+                </div>
+                <div class="glass-card rounded-xl p-6 text-center shadow-lg">
+                    <div class="text-3xl font-bold text-blue-600 mb-2" id="entrepreneurPool">$0</div>
+                    <div class="text-slate-600 dark:text-slate-300">创业资金池</div>
+                </div>
+                <div class="glass-card rounded-xl p-6 text-center shadow-lg">
+                    <div class="text-3xl font-bold text-purple-600 mb-2" id="charityPool">$0</div>
+                    <div class="text-slate-600 dark:text-slate-300">慈善基金池</div>
+                </div>
+                <div class="glass-card rounded-xl p-6 text-center shadow-lg">
+                    <div class="text-3xl font-bold text-yellow-600 mb-2" id="profitPool">$0</div>
+                    <div class="text-slate-600 dark:text-slate-300">分润池</div>
+                </div>
+            </section>
+
+            <!-- Detailed Tables -->
+            <div class="grid lg:grid-cols-2 gap-8">
+                <!-- Level Commission Table -->
+                <section class="glass-card rounded-2xl p-6 shadow-xl">
+                    <h3 class="text-xl font-bold text-slate-800 dark:text-white mb-4 flex items-center">
+                        <i class="fas fa-layer-group mr-3 text-blue-500"></i>
+                        七级分润明细
+                    </h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead>
+                                <tr class="border-b border-slate-200 dark:border-slate-700">
+                                    <th class="text-left py-3 px-4 font-semibold text-slate-700 dark:text-slate-300">层级</th>
+                                    <th class="text-right py-3 px-4 font-semibold text-slate-700 dark:text-slate-300">人数</th>
+                                    <th class="text-right py-3 px-4 font-semibold text-slate-700 dark:text-slate-300">费率</th>
+                                    <th class="text-right py-3 px-4 font-semibold text-slate-700 dark:text-slate-300">佣金</th>
+                                </tr>
+                            </thead>
+                            <tbody id="commissionTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Monthly Summary Table -->
+                <section class="glass-card rounded-2xl p-6 shadow-xl">
+                    <h3 class="text-xl font-bold text-slate-800 dark:text-white mb-4 flex items-center">
+                        <i class="fas fa-calendar-alt mr-3 text-green-500"></i>
+                        月度资金池分配
+                    </h3>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
+                            <span class="font-medium text-slate-700 dark:text-slate-300">入金总额</span>
+                            <span class="font-bold text-slate-900 dark:text-white" id="monthlyTotal">$0</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                            <span class="font-medium text-blue-700 dark:text-blue-300">创业资金池 (30%)</span>
+                            <span class="font-bold text-blue-700 dark:text-blue-300" id="monthlyEntrepreneur">$0</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                            <span class="font-medium text-purple-700 dark:text-purple-300">慈善基金池 (3%)</span>
+                            <span class="font-bold text-purple-700 dark:text-purple-300" id="monthlyCharity">$0</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+                            <span class="font-medium text-yellow-700 dark:text-yellow-300">分润池 (57%)</span>
+                            <span class="font-bold text-yellow-700 dark:text-yellow-300" id="monthlyProfit">$0</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-slate-100 dark:bg-slate-700 rounded-lg">
+                            <span class="font-medium text-slate-700 dark:text-slate-300">平台留存 (10%)</span>
+                            <span class="font-bold text-slate-700 dark:text-slate-300" id="monthlyPlatform">$0</span>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- CSV Preview -->
+            <section class="glass-card rounded-2xl p-6 shadow-xl">
+                <h3 class="text-xl font-bold text-slate-800 dark:text-white mb-4 flex items-center">
+                    <i class="fas fa-file-csv mr-3 text-green-500"></i>
+                    CSV 导出预览
+                </h3>
+                <div class="bg-slate-100 dark:bg-slate-800 rounded-lg p-4 font-mono text-sm overflow-x-auto">
+                    <pre id="csvPreview" class="text-slate-700 dark:text-slate-300">点击"计算对账"后显示CSV格式数据...</pre>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // 分润配置 - 使用核心配置
+        const commissionRates = {};
+        SYSTEM_CONFIG.PROFIT_RATES.forEach((rate, index) => {
+            commissionRates[index + 1] = rate;
+        });
+
+        // 资金池分配比例 - 使用核心配置
+        const poolConfig = {
+            entrepreneur: SYSTEM_CONFIG.POOL_CONFIG.ENTREPRENEUR_POOL,
+            charity: SYSTEM_CONFIG.POOL_CONFIG.CHARITY_POOL,
+            profit: SYSTEM_CONFIG.TOTAL_PROFIT_RATE,
+            platform: SYSTEM_CONFIG.POOL_CONFIG.PLATFORM_RETENTION
+        };
+
+        function calculateAll() {
+            const memberCount = parseInt(document.getElementById('memberCount').value) || 0;
+            const amountPerMember = parseFloat(document.getElementById('amountPerMember').value) || 0;
+            const month = document.getElementById('calcMonth').value;
+
+            if (memberCount <= 0 || amountPerMember <= 0) {
+                alert('请输入有效的入金人数和金额');
+                return;
+            }
+
+            // 计算总入金
+            const totalIncome = memberCount * amountPerMember;
+            
+            // 计算资金池分配
+            const entrepreneurPool = totalIncome * poolConfig.entrepreneur;
+            const charityPool = totalIncome * poolConfig.charity;
+            const profitPool = totalIncome * poolConfig.profit;
+            const platformPool = totalIncome * poolConfig.platform;
+
+            // 更新汇总卡片
+            document.getElementById('totalIncome').textContent = `$${totalIncome.toLocaleString()}`;
+            document.getElementById('entrepreneurPool').textContent = `$${entrepreneurPool.toLocaleString()}`;
+            document.getElementById('charityPool').textContent = `$${charityPool.toLocaleString()}`;
+            document.getElementById('profitPool').textContent = `$${profitPool.toLocaleString()}`;
+
+            // 更新月度汇总
+            document.getElementById('monthlyTotal').textContent = `$${totalIncome.toLocaleString()}`;
+            document.getElementById('monthlyEntrepreneur').textContent = `$${entrepreneurPool.toLocaleString()}`;
+            document.getElementById('monthlyCharity').textContent = `$${charityPool.toLocaleString()}`;
+            document.getElementById('monthlyProfit').textContent = `$${profitPool.toLocaleString()}`;
+            document.getElementById('monthlyPlatform').textContent = `$${platformPool.toLocaleString()}`;
+
+            // 计算七级分润
+            calculateLevelCommissions(memberCount, amountPerMember);
+
+            // 生成CSV预览
+            generateCSVPreview(month, memberCount, totalIncome, entrepreneurPool, charityPool, profitPool, platformPool);
+        }
+
+        function calculateLevelCommissions(memberCount, amountPerMember) {
+            const tbody = document.getElementById('commissionTableBody');
+            tbody.innerHTML = '';
+
+            // 理论满层结构计算
+            let currentLevelMembers = memberCount;
+            let totalCommission = 0;
+
+            for (let level = 1; level <= 7; level++) {
+                const rate = commissionRates[level];
+                const levelIncome = currentLevelMembers * amountPerMember;
+                const commission = levelIncome * rate;
+                totalCommission += commission;
+
+                const row = document.createElement('tr');
+                row.className = 'table-row border-b border-slate-100 dark:border-slate-700';
+                row.innerHTML = `
+                    <td class="py-3 px-4 font-semibold text-slate-800 dark:text-white">第${level}级</td>
+                    <td class="py-3 px-4 text-right text-slate-700 dark:text-slate-300">${currentLevelMembers.toLocaleString()}</td>
+                    <td class="py-3 px-4 text-right text-slate-700 dark:text-slate-300">${(rate * 100).toFixed(0)}%</td>
+                    <td class="py-3 px-4 text-right font-bold text-green-600">$${commission.toLocaleString()}</td>
+                `;
+                tbody.appendChild(row);
+
+                // 下一级人数按5倍增长（理论值）
+                currentLevelMembers = currentLevelMembers * 5;
+            }
+        }
+
+        function generateCSVPreview(month, memberCount, totalIncome, entrepreneurPool, charityPool, profitPool, platformPool) {
+            const csvData = [];
+
+            // 月度资金池分配表
+            csvData.push('### 月度资金池分配表');
+            csvData.push('月份,入金总额,创业资金池(30%),慈善基金池(3%),分润池(57%),平台留存(10%),状态');
+            csvData.push(`${month},${totalIncome},${entrepreneurPool},${charityPool},${profitPool},${platformPool},已对账`);
+
+            csvData.push(''); // 空行
+
+            // 七级分润汇总表
+            csvData.push('### 七级分润汇总表');
+            csvData.push('层级,人数,单人入金($),本层总入金($),费率,佣金总额($)');
+            
+            let currentLevelMembers = memberCount;
+            for (let level = 1; level <= 7; level++) {
+                const rate = commissionRates[level];
+                const levelIncome = currentLevelMembers * 300; // 假设每人300
+                const commission = levelIncome * rate;
+                csvData.push(`${level},${currentLevelMembers},300,${levelIncome},${(rate * 100).toFixed(0)}%,${commission}`);
+                currentLevelMembers = currentLevelMembers * 5;
+            }
+
+            csvData.push(''); // 空行
+
+            // 单笔交易示例
+            csvData.push('### 单笔交易分润示例');
+            csvData.push('日期,交易号,交易额,一级佣金,二级佣金,三级佣金,四级佣金,五级佣金,六级佣金,七级佣金,创业资金池,慈善基金池,平台留存,净发放总额,状态');
+            csvData.push(`2026-01-08,TXN001,300,60,24,24,18,15,15,15,90,9,30,171,已发放`);
+
+            document.getElementById('csvPreview').textContent = csvData.join('\n');
+        }
+
+        function exportToCSV() {
+            const csvContent = document.getElementById('csvPreview').textContent;
+            if (csvContent === '点击"计算对账"后显示CSV格式数据...') {
+                alert('请先计算对账数据');
+                return;
+            }
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `梦之缘对账表_${new Date().toISOString().slice(0, 10)}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // 页面加载时自动计算一次
+        document.addEventListener('DOMContentLoaded', function() {
+            calculateAll();
+        });
+    </script>
+</body>
+</html>
