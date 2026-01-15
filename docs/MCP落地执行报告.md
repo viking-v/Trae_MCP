@@ -15,7 +15,7 @@
 
 | 任务ID | 任务名 | 状态 | 说明 |
 |---|---|---|---|
-| MCP-001 | Project 初始化 | 已暂停 | 未提供 GitHub 侧权限/凭据和目标位置 |
+| MCP-001 | Project 初始化 | 待执行（阻塞已解除） | GitHub 仓库与远端已就绪，可开始创建 Project |
 | MCP-002 | 字典配置落地 | 未开始 | 依赖 Project 初始化完成 |
 | MCP-003 | 门禁要求配置 | 未开始 | 必须具备 Project、任务等配置交互能力 |
 | MCP-004 | 通知集成 | 未开始 | 依赖 Project 初始化成功 |
@@ -48,17 +48,21 @@
     - .github/workflows/mcp-pr-merged-enforcer.yml
     - .github/workflows/mcp-release-feishu-notify.yml
 
+### MCP-000（前置已完成）：GitHub 仓库同步到远端
+- 状态：已完成
+- 结果：
+  - 远端仓库：viking-v/Trae_MCP
+  - 推送结果：main 已推送并跟踪 origin/main
+  - 本地状态：main...origin/main（clean）
+
 ### MCP-001：Project 初始化
-- 状态：已暂停（阻塞）
-- 阻塞原因：
-  - 该步骤需要在 GitHub（组织/仓库）侧创建 Project，并需要具备对应权限与访问凭据。
-  - 当前执行环境为本地 IDE 仓库上下文，未提供可用于 GitHub API/控制台操作的凭据、owner/org 信息与 Project 目标位置，因此无法完成此步骤。
-- 影响：
-  - 按“逐步完成再进入下一步”的执行要求，后续 MCP-002 ～ MCP-006 需等待该步骤完成后才能继续执行。
-- 需要的输入资源/前提条件（按方案要求的最小集合）：
-  - GitHub 目标位置（组织或仓库维度）
-  - 具备创建 Project 的权限账号
-  - 若走自动化方式：具有 `project` 相关权限的 Token（仅用于创建/配置 Project）
+- 状态：待执行（阻塞已解除）
+- 解除阻塞说明：
+  - 已确定 GitHub 目标位置（viking-v/Trae_MCP），且已完成首次推送
+- 下一步执行所需输入资源/前提条件（按方案要求的最小集合）：
+  - 具备在 viking-v/Trae_MCP 创建 Project 的权限账号
+  - 确认 Project 位置：仓库级 Projects 或组织级 Projects
+  - 若走自动化方式：具有 projects 相关权限的 Token（仅用于创建/配置 Project）
 
 ## 结论
-已完成仓库内资产准备与校验；在执行到 MCP-001 时因缺少 GitHub 侧必需输入资源而暂停。待 MCP-001 在 GitHub 侧完成后，可继续按既定顺序执行 MCP-002 → MCP-003 → MCP-004 → MCP-005 → MCP-006。
+已完成仓库内资产准备与校验，并完成 GitHub 仓库首次推送。MCP-001 的阻塞条件已解除，待完成 Project 创建后，可继续按既定顺序执行 MCP-002 → MCP-003 → MCP-004 → MCP-005 → MCP-006。
